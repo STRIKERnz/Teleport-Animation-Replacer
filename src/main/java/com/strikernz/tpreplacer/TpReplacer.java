@@ -13,7 +13,9 @@ import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 @PluginDescriptor(
 		name = "Teleport Animation Replacer",
@@ -38,6 +40,17 @@ public class TpReplacer extends Plugin
 
 	// Map: originalSoundId -> expireTick (inclusive)
 	private final Map<Integer, Integer> mutedSoundUntilTick = new HashMap<>();
+
+	// All known teleport sound IDs — built once from the enum
+	private static final Set<Integer> KNOWN_TELEPORT_SOUNDS = new HashSet<>();
+	static
+	{
+		for (TeleportAnimation ta : TeleportAnimation.values())
+		{
+			if (ta.getSoundId() != -1)
+				KNOWN_TELEPORT_SOUNDS.add(ta.getSoundId());
+		}
+	}
 
 	@Override
 	protected void startUp()
@@ -90,7 +103,7 @@ public class TpReplacer extends Plugin
 
 		if (originalSound != -1 && config.muteTeleportSound())
 		{
-			mutedSoundUntilTick.put(originalSound, client.getTickCount() + 1);
+			mutedSoundUntilTick.put(originalSound, client.getTickCount() + 3);
 		}
 
 		if (selected == TeleportAnimation.COWBELL)
@@ -101,19 +114,6 @@ public class TpReplacer extends Plugin
 			return;
 		}
 
-		if (selected == TeleportAnimation.CUSTOM)
-		{
-			TeleportAnimation source = TeleportAnimation.fromAnimationId(animationId);
-			int[] ids = getCustomIds(source);
-			int anim  = ids[0];
-			int gfx   = ids[1];
-			int sound = ids[2];
-
-			if (anim != -1)  player.setAnimation(anim);
-			if (gfx  != -1)  player.setGraphic(gfx);
-			if (sound != -1) playSoundOnce(sound);
-			return;
-		}
 
 		// Generic override path — use data from the enum
 		player.setAnimation(selected.getAnimationId());
@@ -187,9 +187,28 @@ public class TpReplacer extends Plugin
 		int soundId = event.getSoundId();
 		int tick = client.getTickCount();
 
+		// Don't suppress a sound the plugin itself just triggered
 		if (soundId == lastPlayedSoundId && tick == lastPlayedSoundTick)
 			return;
 
+		if (KNOWN_TELEPORT_SOUNDS.contains(soundId))
+		{
+			for (TeleportAnimation ta : TeleportAnimation.values())
+			{
+				if (ta.getSoundId() == soundId)
+				{
+					TeleportAnimation selected = getSelectedForAnimation(ta.getAnimationId());
+					if (selected != TeleportAnimation.NONE && selected != ta)
+					{
+						event.consume();
+						return;
+					}
+					break;
+				}
+			}
+		}
+
+		// Fallback: mute map covers late-arriving sounds
 		if (mutedSoundUntilTick.getOrDefault(soundId, -1) >= tick)
 		{
 			event.consume();
@@ -227,40 +246,6 @@ public class TpReplacer extends Plugin
 		return (per != TeleportAnimation.NONE) ? per : config.teleportAnimation();
 	}
 
-	// Returns [animId, gfxId, soundId] for the CUSTOM option for a given source teleport type
-	private int[] getCustomIds(TeleportAnimation source)
-	{
-		if (source == null) return new int[]{-1, -1, -1};
-		String raw;
-		switch (source)
-		{
-			case STANDARD:      raw = config.customNormal();       break;
-			case ANCIENT:       raw = config.customAncient();      break;
-			case ARCEUUS:       raw = config.customArceuus();      break;
-			case LUNAR:         raw = config.customLunar();        break;
-			case TAB:           raw = config.customTabs();         break;
-			case SCROLL:        raw = config.customScrolls();      break;
-			case ECTOPHIAL:     raw = config.customEctophial();    break;
-			case ARDOUGNE:      raw = config.customArdougne();     break;
-			case DESERT_AMULET: raw = config.customDesertAmulet(); break;
-			default:            return new int[]{-1, -1, -1};
-		}
-		return parseCustomIds(raw);
-	}
-
-	// Parses "animId,gfxId,soundId" — returns [-1,-1,-1] on any parse error
-	private static int[] parseCustomIds(String raw)
-	{
-		int[] result = {-1, -1, -1};
-		if (raw == null || raw.isBlank()) return result;
-		String[] parts = raw.split(",", -1);
-		for (int i = 0; i < Math.min(parts.length, 3); i++)
-		{
-			try { result[i] = Integer.parseInt(parts[i].trim()); }
-			catch (NumberFormatException ignored) {}
-		}
-		return result;
-	}
 
 	private void playSoundOnce(int soundId)
 	{

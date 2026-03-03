@@ -20,15 +20,6 @@ public interface TpreplacerConfig extends Config
 		position = 1)
 	String perSection = "per";
 
-	@ConfigSection(
-		name = "Custom",
-		description = "Advanced: set custom animation, graphic and sound IDs per teleport type when 'Custom' is selected. " +
-			"Format: animationId,graphicId,soundId (e.g. 714,111,200). Use -1 to skip a field. " +
-			"IDs can be found using the Identificator and Visual Sound plugins.",
-		position = 2,
-		closedByDefault = true
-	)
-	String customSection = "custom";
 
 	// ---- Global ----
 
@@ -84,33 +75,4 @@ public interface TpreplacerConfig extends Config
 
 	@ConfigItem(keyName = "per_overrideDesertAmulet", name = "Desert Amulet",        description = "Per-teleport animation (None uses global setting)", position = 8, section = perSection)
 	default TeleportAnimation perOverrideDesertAmulet() { return TeleportAnimation.NONE; }
-
-	// ---- Custom IDs (animId,gfxId,soundId) ----
-
-	@ConfigItem(keyName = "custom_normal",       name = "Normal / Jewellery", description = "animId,gfxId,soundId — e.g. 714,111,200. Use -1 to skip.", position = 0, section = customSection)
-	default String customNormal()       { return "-1,-1,-1"; }
-
-	@ConfigItem(keyName = "custom_ancient",      name = "Ancient",            description = "animId,gfxId,soundId — e.g. 1979,392,197. Use -1 to skip.", position = 1, section = customSection)
-	default String customAncient()      { return "-1,-1,-1"; }
-
-	@ConfigItem(keyName = "custom_arceuus",      name = "Arceuus",            description = "animId,gfxId,soundId — e.g. 3865,1296,200. Use -1 to skip.", position = 2, section = customSection)
-	default String customArceuus()      { return "-1,-1,-1"; }
-
-	@ConfigItem(keyName = "custom_lunar",        name = "Lunar",              description = "animId,gfxId,soundId — e.g. 1816,747,200. Use -1 to skip.", position = 3, section = customSection)
-	default String customLunar()        { return "-1,-1,-1"; }
-
-	@ConfigItem(keyName = "custom_tabs",         name = "Tabs",               description = "animId,gfxId,soundId — e.g. 4071,678,965. Use -1 to skip.", position = 4, section = customSection)
-	default String customTabs()         { return "-1,-1,-1"; }
-
-	@ConfigItem(keyName = "custom_scrolls",      name = "Scrolls",            description = "animId,gfxId,soundId — e.g. 3864,111,200. Use -1 to skip.", position = 5, section = customSection)
-	default String customScrolls()      { return "-1,-1,-1"; }
-
-	@ConfigItem(keyName = "custom_ectophial",    name = "Ectophial",          description = "animId,gfxId,soundId — e.g. 878,1273,2401. Use -1 to skip.", position = 6, section = customSection)
-	default String customEctophial()    { return "-1,-1,-1"; }
-
-	@ConfigItem(keyName = "custom_ardougne",     name = "Ardougne Cape",      description = "animId,gfxId,soundId — e.g. 3872,1237,200. Use -1 to skip.", position = 7, section = customSection)
-	default String customArdougne()     { return "-1,-1,-1"; }
-
-	@ConfigItem(keyName = "custom_desertAmulet", name = "Desert Amulet",      description = "animId,gfxId,soundId — e.g. 9606,284,200. Use -1 to skip.", position = 8, section = customSection)
-	default String customDesertAmulet() { return "-1,-1,-1"; }
 }
