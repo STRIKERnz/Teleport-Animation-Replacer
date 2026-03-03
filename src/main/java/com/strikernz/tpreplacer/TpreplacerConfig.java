@@ -35,17 +35,6 @@ public interface TpreplacerConfig extends Config
 		return TeleportAnimation.COWBELL;
 	}
 
-	@ConfigItem(
-		keyName = "muteTeleportSound",
-		name = "Mute Teleport Sound",
-		description = "Suppress the default teleport sound when the plugin replaces the animation",
-		position = 1,
-		section = allSection
-	)
-	default boolean muteTeleportSound()
-	{
-		return true;
-	}
 
 	// ---- Per Teleport ----
 

@@ -1,7 +1,12 @@
 package com.strikernz.tpreplacer;
 
 import com.google.inject.Provides;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import javax.inject.Inject;
+import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
 import net.runelite.api.Player;
 import net.runelite.api.events.AnimationChanged;
@@ -12,68 +17,82 @@ import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
+@Slf4j
 @PluginDescriptor(
-		name = "Teleport Animation Replacer",
-		description = "Replace teleport animations with Different teleport animations graphics and sounds",
-		tags = {"animation", "teleport", "sound", "graphic",  "customization"}
+	name = "Teleport Animation Replacer",
+	description = "Replace teleport animations with different animations, graphics, and sounds",
+	tags = {"animation", "teleport", "sound", "graphic", "customization", "cowbell", "cosmetic"}
 )
 public class TpReplacer extends Plugin
 {
+	private static final int ARRIVAL_SOUND_DELAY_TICKS = 2;
+
+	/** All known teleport sound IDs, built once from the enum for fast lookup. */
+	private static final Set<Integer> KNOWN_TELEPORT_SOUNDS = new HashSet<>();
+
+	static
+	{
+		for (TeleportAnimation ta : TeleportAnimation.values())
+		{
+			if (ta.getSoundId() != -1)
+			{
+				KNOWN_TELEPORT_SOUNDS.add(ta.getSoundId());
+			}
+		}
+	}
+
 	@Inject
 	private Client client;
 
 	@Inject
 	private TpreplacerConfig config;
 
-	private boolean teleporting = false;
-	private int arrivalSoundTicksRemaining = -1;
-	private static final int ARRIVAL_SOUND_DELAY_TICKS = 2;
+	/** Whether the local player is currently in a cowbell teleport (waiting for landing). */
+	private boolean teleporting;
 
-	// Track last played sound to avoid double-playing in the same tick
+	/** Ticks remaining before the cowbell arrival sound should play ({@code -1} = inactive). */
+	private int arrivalSoundTicksRemaining = -1;
+
+	/** Tracks the last sound the plugin played so we don't suppress our own effects. */
 	private int lastPlayedSoundId = -1;
 	private int lastPlayedSoundTick = -1;
 
-	// Map: originalSoundId -> expireTick (inclusive)
+	/** Original-sound-id to tick at which the mute expires (inclusive). */
 	private final Map<Integer, Integer> mutedSoundUntilTick = new HashMap<>();
-
-	// All known teleport sound IDs — built once from the enum
-	private static final Set<Integer> KNOWN_TELEPORT_SOUNDS = new HashSet<>();
-	static
-	{
-		for (TeleportAnimation ta : TeleportAnimation.values())
-		{
-			if (ta.getSoundId() != -1)
-				KNOWN_TELEPORT_SOUNDS.add(ta.getSoundId());
-		}
-	}
 
 	@Override
 	protected void startUp()
 	{
 		teleporting = false;
+		arrivalSoundTicksRemaining = -1;
+		lastPlayedSoundId = -1;
+		lastPlayedSoundTick = -1;
+		mutedSoundUntilTick.clear();
 	}
 
 	@Override
 	protected void shutDown()
 	{
 		teleporting = false;
+		arrivalSoundTicksRemaining = -1;
+		lastPlayedSoundId = -1;
+		lastPlayedSoundTick = -1;
+		mutedSoundUntilTick.clear();
 	}
 
 	@Subscribe
 	public void onAnimationChanged(AnimationChanged event)
 	{
 		if (event.getActor() != client.getLocalPlayer())
+		{
 			return;
+		}
 
 		Player player = client.getLocalPlayer();
 		int animationId = player.getAnimation();
 
-		// Cowbell arrival: play landing animation when teleport ends
+		// Cowbell arrival: play the landing animation when the teleport ends
 		if (teleporting && animationId == -1)
 		{
 			teleporting = false;
@@ -83,29 +102,35 @@ public class TpReplacer extends Plugin
 			return;
 		}
 
-		// Only act on known teleport animations
 		if (!AnimationConstants.isTeleportAnimation(animationId))
+		{
 			return;
+		}
 
 		TeleportAnimation selected = getSelectedForAnimation(animationId);
 
-		// NONE on the global setting means do nothing
+		// NONE means "don't override"
 		if (selected == TeleportAnimation.NONE)
+		{
 			return;
+		}
 
-		// Already playing the target animation — nothing to do
+		// Already playing the target animation
 		if (animationId == selected.getAnimationId())
+		{
 			return;
+		}
 
-		// The original teleport type, used to look up its native sound for muting
+		// Mute the original teleport sound so it doesn't double-play
 		TeleportAnimation original = TeleportAnimation.fromAnimationId(animationId);
 		int originalSound = (original != null) ? original.getSoundId() : -1;
 
-		if (originalSound != -1 && config.muteTeleportSound())
+		if (originalSound != -1)
 		{
 			mutedSoundUntilTick.put(originalSound, client.getTickCount() + 3);
 		}
 
+		// Cowbell has a special two-phase animation (cast + landing)
 		if (selected == TeleportAnimation.COWBELL)
 		{
 			teleporting = true;
@@ -114,8 +139,7 @@ public class TpReplacer extends Plugin
 			return;
 		}
 
-
-		// Generic override path — use data from the enum
+		// Generic override path
 		player.setAnimation(selected.getAnimationId());
 
 		if (selected.getGraphicId() != -1)
@@ -133,21 +157,22 @@ public class TpReplacer extends Plugin
 	public void onGameTick(GameTick event)
 	{
 		if (client.getLocalPlayer() == null)
+		{
 			return;
+		}
 
-		// Remove expired mute entries
+		// Expire old mute entries
 		int tick = client.getTickCount();
 		mutedSoundUntilTick.values().removeIf(expire -> expire < tick);
 
 		if (arrivalSoundTicksRemaining < 0)
+		{
 			return;
+		}
 
 		if (arrivalSoundTicksRemaining == 0)
 		{
-			if (AnimationConstants.COWBELL_ARRIVAL_SOUND != -1)
-			{
-				playSoundOnce(AnimationConstants.COWBELL_ARRIVAL_SOUND);
-			}
+			playSoundOnce(AnimationConstants.COWBELL_ARRIVAL_SOUND);
 			arrivalSoundTicksRemaining = -1;
 		}
 		else
@@ -159,18 +184,20 @@ public class TpReplacer extends Plugin
 	@Subscribe
 	public void onSoundEffectPlayed(SoundEffectPlayed event)
 	{
-		if (!config.muteTeleportSound())
-			return;
 
 		if (event.getSource() != client.getLocalPlayer())
+		{
 			return;
+		}
 
 		int soundId = event.getSoundId();
 		int tick = client.getTickCount();
 
 		// Don't suppress a sound the plugin itself just triggered
 		if (soundId == lastPlayedSoundId && tick == lastPlayedSoundTick)
+		{
 			return;
+		}
 
 		if (mutedSoundUntilTick.getOrDefault(soundId, -1) >= tick)
 		{
@@ -181,15 +208,15 @@ public class TpReplacer extends Plugin
 	@Subscribe
 	public void onAreaSoundEffectPlayed(AreaSoundEffectPlayed event)
 	{
-		if (!config.muteTeleportSound())
-			return;
 
 		int soundId = event.getSoundId();
 		int tick = client.getTickCount();
 
 		// Don't suppress a sound the plugin itself just triggered
 		if (soundId == lastPlayedSoundId && tick == lastPlayedSoundTick)
+		{
 			return;
+		}
 
 		if (KNOWN_TELEPORT_SOUNDS.contains(soundId))
 		{
@@ -208,7 +235,7 @@ public class TpReplacer extends Plugin
 			}
 		}
 
-		// Fallback: mute map covers late-arriving sounds
+		// Fallback: the mute map covers late-arriving area sounds
 		if (mutedSoundUntilTick.getOrDefault(soundId, -1) >= tick)
 		{
 			event.consume();
@@ -221,40 +248,70 @@ public class TpReplacer extends Plugin
 		return configManager.getConfig(TpreplacerConfig.class);
 	}
 
-	// Resolve the override for a given animation ID, falling back to the global setting when per-teleport is NONE
+	/**
+	 * Resolves the override animation for a given source animation ID.
+	 * Per-teleport settings take priority; if set to NONE the global setting is used.
+	 */
 	private TeleportAnimation getSelectedForAnimation(int animationId)
 	{
 		TeleportAnimation source = TeleportAnimation.fromAnimationId(animationId);
 		if (source == null)
-			return config.teleportAnimation();
-
-		TeleportAnimation per;
-		switch (source)
 		{
-			case STANDARD:      per = config.perOverrideNormal();        break;
-			case ANCIENT:       per = config.perOverrideAncient();       break;
-			case ARCEUUS:       per = config.perOverrideArceuus();       break;
-			case LUNAR:         per = config.perOverrideLunar();         break;
-			case TAB:           per = config.perOverrideTabs();          break;
-			case SCROLL:        per = config.perOverrideScrolls();       break;
-			case ECTOPHIAL:     per = config.perOverrideEctophial();     break;
-			case ARDOUGNE:      per = config.perOverrideArdougne();      break;
-			case DESERT_AMULET: per = config.perOverrideDesertAmulet(); break;
-			default:            return config.teleportAnimation();
+			return config.teleportAnimation();
 		}
 
-		return (per != TeleportAnimation.NONE) ? per : config.teleportAnimation();
+		TeleportAnimation perOverride;
+		switch (source)
+		{
+			case STANDARD:
+				perOverride = config.perOverrideNormal();
+				break;
+			case ANCIENT:
+				perOverride = config.perOverrideAncient();
+				break;
+			case ARCEUUS:
+				perOverride = config.perOverrideArceuus();
+				break;
+			case LUNAR:
+				perOverride = config.perOverrideLunar();
+				break;
+			case TAB:
+				perOverride = config.perOverrideTabs();
+				break;
+			case SCROLL:
+				perOverride = config.perOverrideScrolls();
+				break;
+			case ECTOPHIAL:
+				perOverride = config.perOverrideEctophial();
+				break;
+			case ARDOUGNE:
+				perOverride = config.perOverrideArdougne();
+				break;
+			case DESERT_AMULET:
+				perOverride = config.perOverrideDesertAmulet();
+				break;
+			default:
+				return config.teleportAnimation();
+		}
+
+		return (perOverride != TeleportAnimation.NONE) ? perOverride : config.teleportAnimation();
 	}
 
-
+	/**
+	 * Plays a sound effect, de-duplicating within the same game tick.
+	 */
 	private void playSoundOnce(int soundId)
 	{
 		if (soundId == -1)
+		{
 			return;
+		}
 
 		int tick = client.getTickCount();
 		if (soundId == lastPlayedSoundId && tick == lastPlayedSoundTick)
+		{
 			return;
+		}
 
 		lastPlayedSoundId = soundId;
 		lastPlayedSoundTick = tick;

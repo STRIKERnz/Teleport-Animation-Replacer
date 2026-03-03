@@ -1,10 +1,15 @@
 package com.strikernz.tpreplacer;
 
-import lombok.Getter;
-
 import java.util.HashMap;
 import java.util.Map;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
+/**
+ * Teleport animation presets that can be selected in the plugin configuration.
+ */
+@Getter
+@RequiredArgsConstructor
 public enum TeleportAnimation
 {
 	NONE(-1, -1, -1, "None (Use Global)"),
@@ -32,21 +37,10 @@ public enum TeleportAnimation
 		}
 	}
 
-	@Getter
-    private final int animationId;
-	@Getter
-    private final int graphicId;
-	@Getter
-    private final int soundId;
+	private final int animationId;
+	private final int graphicId;
+	private final int soundId;
 	private final String name;
-
-	TeleportAnimation(int animationId, int graphicId, int soundId, String name)
-	{
-		this.animationId = animationId;
-		this.graphicId = graphicId;
-		this.soundId = soundId;
-		this.name = name;
-	}
 
 	public static TeleportAnimation fromAnimationId(int animationId)
 	{

@@ -1,5 +1,8 @@
 package com.strikernz.tpreplacer;
 
+/**
+ * Animation, graphic, and sound-effect IDs for all supported teleport types.
+ */
 public final class AnimationConstants
 {
 	public static final int COWBELL_TELEPORT = 13811;
@@ -44,7 +47,6 @@ public final class AnimationConstants
 
 	private AnimationConstants() {}
 
-	/** Returns true if the given animation ID is any known teleport animation. */
 	public static boolean isTeleportAnimation(int animationId)
 	{
 		return TeleportAnimation.fromAnimationId(animationId) != null;

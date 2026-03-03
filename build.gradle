@@ -3,7 +3,6 @@ plugins {
 }
 
 repositories {
-	//mavenLocal()
 	maven {
 		url = 'https://repo.runelite.net'
 		content {
@@ -14,7 +13,7 @@ repositories {
 }
 
 def runeLiteVersion = 'latest.release'
-def pluginMainClass = 'com.example.ExamplePluginTest'
+def pluginMainClass = 'com.strikernz.tpreplacer.TpreplacerPluginTest'
 
 dependencies {
 	compileOnly group: 'net.runelite', name:'client', version: runeLiteVersion
@@ -22,12 +21,12 @@ dependencies {
 	compileOnly 'org.projectlombok:lombok:1.18.30'
 	annotationProcessor 'org.projectlombok:lombok:1.18.30'
 
-	testImplementation 'junit:junit:4.12'
+	testImplementation 'junit:junit:4.13.2'
 	testImplementation group: 'net.runelite', name:'client', version: runeLiteVersion
 	testImplementation group: 'net.runelite', name:'jshell', version: runeLiteVersion
 }
 
-group = 'com.example'
+group = 'com.strikernz.tpreplacer'
 version = '1.0-SNAPSHOT'
 
 tasks.withType(JavaCompile).configureEach {
