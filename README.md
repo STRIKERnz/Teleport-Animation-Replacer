@@ -1,4 +1,4 @@
-# Teleport animation replacer
+# Teleport Animation Replacer
 A RuneLite plugin that replaces many teleport animations with an alternative animation (default: the Cowbell Amulet teleport) and provides fine-grained configuration over which teleports are affected.
 
 ## Features
