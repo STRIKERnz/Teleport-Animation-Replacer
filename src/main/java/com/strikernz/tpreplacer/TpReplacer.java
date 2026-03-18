@@ -92,11 +92,10 @@ public class TpReplacer extends Plugin
 		Player player = client.getLocalPlayer();
 		int animationId = player.getAnimation();
 
-		// Cowbell arrival: play the landing animation when the teleport ends
+		// Cowbell arrival: play the landing graphic and sound when the teleport ends
 		if (teleporting && animationId == -1)
 		{
 			teleporting = false;
-			player.setAnimation(AnimationConstants.COWBELL_TELEPORT);
 			player.setGraphic(AnimationConstants.COWBELL_TELEPORT_GRAPHIC);
 			arrivalSoundTicksRemaining = ARRIVAL_SOUND_DELAY_TICKS;
 			return;
