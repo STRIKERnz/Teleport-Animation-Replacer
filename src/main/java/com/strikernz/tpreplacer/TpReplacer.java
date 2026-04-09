@@ -289,6 +289,12 @@ public class TpReplacer extends Plugin
 			case DESERT_AMULET:
 				perOverride = config.perOverrideDesertAmulet();
 				break;
+			case EXPLORERS_RING:
+				perOverride = config.perOverrideExplorersRing();
+				break;
+			case PHARAOHS_SCEPTRE:
+				perOverride = config.perOverridePharaohsSceptre();
+				break;
 			case GIANTSOUL_AMULET:
 				perOverride = config.perOverrideGiantsoulAmulet();
 				break;

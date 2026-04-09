@@ -49,6 +49,13 @@ public final class AnimationConstants
 	public static final int GIANTSOUL_AMULET_TELEPORT_GRAPHIC = 3226;
 	public static final int GIANTSOUL_AMULET_TELEPORT_SOUND = 10193;
 
+	public static final int EXPLORERS_RING_TELEPORT = 3869;
+	public static final int EXPLORERS_RING_TELEPORT_GRAPHIC = 285;
+
+	public static final int PHARAOHS_SCEPTRE_TELEPORT = 3864;
+	public static final int PHARAOHS_SCEPTRE_TELEPORT_GRAPHIC = 1080;
+	public static final int PHARAOHS_SCEPTRE_TELEPORT_SOUND = 200;
+
 	private AnimationConstants() {}
 
 	public static boolean isTeleportAnimation(int animationId)

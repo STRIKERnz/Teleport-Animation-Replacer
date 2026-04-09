@@ -23,7 +23,9 @@ public enum TeleportAnimation
 	ECTOPHIAL(AnimationConstants.ECTOPHIAL_TELEPORT, AnimationConstants.ECTOPHIAL_TELEPORT_GRAPHIC, AnimationConstants.ECTOPHIAL_TELEPORT_SOUND, "Ectophial"),
 	ARDOUGNE(AnimationConstants.ARDOUGNE_TELEPORT, AnimationConstants.ARDOUGNE_TELEPORT_GRAPHIC, AnimationConstants.ARDOUGNE_TELEPORT_SOUND, "Ardougne Cape"),
 	DESERT_AMULET(AnimationConstants.DESERT_AMULET_TELEPORT, AnimationConstants.DESERT_AMULET_TELEPORT_GRAPHIC, AnimationConstants.DESERT_AMULET_TELEPORT_SOUND, "Desert Amulet"),
-	GIANTSOUL_AMULET(AnimationConstants.GIANTSOUL_AMULET_TELEPORT, AnimationConstants.GIANTSOUL_AMULET_TELEPORT_GRAPHIC, AnimationConstants.GIANTSOUL_AMULET_TELEPORT_SOUND, "Giantsoul Amulet");
+		GIANTSOUL_AMULET(AnimationConstants.GIANTSOUL_AMULET_TELEPORT, AnimationConstants.GIANTSOUL_AMULET_TELEPORT_GRAPHIC, AnimationConstants.GIANTSOUL_AMULET_TELEPORT_SOUND, "Giantsoul Amulet"),
+		PHARAOHS_SCEPTRE(AnimationConstants.PHARAOHS_SCEPTRE_TELEPORT, AnimationConstants.PHARAOHS_SCEPTRE_TELEPORT_GRAPHIC, AnimationConstants.PHARAOHS_SCEPTRE_TELEPORT_SOUND, "Pharaoh's Sceptre"),
+		EXPLORERS_RING(AnimationConstants.EXPLORERS_RING_TELEPORT, AnimationConstants.EXPLORERS_RING_TELEPORT_GRAPHIC, -1, "Explorers Ring");
 
 	private static final Map<Integer, TeleportAnimation> BY_ANIMATION_ID = new HashMap<>();
 
