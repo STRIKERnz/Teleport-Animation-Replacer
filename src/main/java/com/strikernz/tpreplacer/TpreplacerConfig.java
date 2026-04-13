@@ -22,7 +22,8 @@ public interface TpreplacerConfig extends Config
 
 	@ConfigSection(name = "Custom",
 		description = "Custom IDs for testing (animation, graphic, sound)",
-		position = 2)
+			position = 2,
+			closedByDefault = true)
 	String customSection = "custom";
 
 

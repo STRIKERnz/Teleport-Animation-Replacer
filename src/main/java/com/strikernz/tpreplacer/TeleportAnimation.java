@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 public enum TeleportAnimation
 {
 	NONE(-1, -1, -1, "None (Use Global)"),
-	CUSTOM(-1, -1, -1, "Custom (Use IDs from config)"),
+	CUSTOM(-1, -1, -1, "Custom (Use IDs)"),
 	COWBELL(AnimationConstants.COWBELL_TELEPORT, AnimationConstants.COWBELL_TELEPORT_GRAPHIC, -1, "Cowbell Amulet"),
 	STANDARD(AnimationConstants.STANDARD_AND_JEWELLERY_TELEPORT, AnimationConstants.STANDARD_TELEPORT_GRAPHIC, AnimationConstants.STANDARD_TELEPORT_SOUND, "Standard / Jewellery"),
 	ANCIENT(AnimationConstants.ANCIENT_TELEPORT, AnimationConstants.ANCIENT_TELEPORT_GRAPHIC, AnimationConstants.ANCIENT_TELEPORT_SOUND, "Ancient"),
