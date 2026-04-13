@@ -114,8 +114,32 @@ public class TpReplacer extends Plugin
 			return;
 		}
 
+		// Determine the target animation id (selected enum or custom config)
+		int parsedCustomAnim = -1;
+		if (selected == TeleportAnimation.CUSTOM)
+		{
+			String ids = config.customIds();
+			if (ids != null && !ids.isEmpty())
+			{
+				String[] parts = ids.split(",");
+				try
+				{
+					if (parts.length > 0)
+					{
+						parsedCustomAnim = Integer.parseInt(parts[0].trim());
+					}
+				}
+				catch (NumberFormatException ex)
+				{
+					parsedCustomAnim = -1;
+				}
+			}
+		}
+
+		int selectedAnimationId = selected == TeleportAnimation.CUSTOM ? parsedCustomAnim : selected.getAnimationId();
+
 		// Already playing the target animation
-		if (animationId == selected.getAnimationId())
+		if (selectedAnimationId != -1 && animationId == selectedAnimationId)
 		{
 			return;
 		}
@@ -138,7 +162,60 @@ public class TpReplacer extends Plugin
 			return;
 		}
 
-		// Generic override path
+		// Handle custom override (uses numeric IDs from single comma-separated config field)
+		if (selected == TeleportAnimation.CUSTOM)
+		{
+			String ids = config.customIds();
+			int anim = -1;
+			int gfx = -1;
+			int snd = -1;
+
+			if (ids != null && !ids.isEmpty())
+			{
+				String[] parts = ids.split(",");
+				try
+				{
+					if (parts.length > 0)
+					{
+						anim = Integer.parseInt(parts[0].trim());
+					}
+					if (parts.length > 1)
+					{
+						gfx = Integer.parseInt(parts[1].trim());
+					}
+					if (parts.length > 2)
+					{
+						snd = Integer.parseInt(parts[2].trim());
+					}
+				}
+				catch (NumberFormatException ex)
+				{
+					// Ignore and treat invalid entries as -1
+					anim = -1;
+					gfx = -1;
+					snd = -1;
+				}
+			}
+
+			if (anim != -1)
+			{
+				player.setAnimation(anim);
+			}
+
+			if (gfx != -1)
+			{
+				player.setGraphic(gfx);
+			}
+
+			if (snd != -1)
+			{
+				playSoundOnce(snd);
+			}
+
+			return;
+		}
+
+		// Generic override path for enum-based presets
 		player.setAnimation(selected.getAnimationId());
 
 		if (selected.getGraphicId() != -1)
@@ -291,6 +368,13 @@ public class TpReplacer extends Plugin
 				break;
 			case EXPLORERS_RING:
 				perOverride = config.perOverrideExplorersRing();
+				break;
+			case RING_OF_SHADOWS_WHITE:
+			case RING_OF_SHADOWS_RED:
+			case RING_OF_SHADOWS_BLACK:
+			case RING_OF_SHADOWS_GRAY:
+			case RING_OF_SHADOWS_ALL:
+				perOverride = config.perOverrideRingOfShadows();
 				break;
 			case PHARAOHS_SCEPTRE:
 				perOverride = config.perOverridePharaohsSceptre();

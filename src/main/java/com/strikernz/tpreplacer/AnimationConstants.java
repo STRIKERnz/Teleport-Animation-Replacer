@@ -56,6 +56,16 @@ public final class AnimationConstants
 	public static final int PHARAOHS_SCEPTRE_TELEPORT_GRAPHIC = 715;
 	public static final int PHARAOHS_SCEPTRE_TELEPORT_SOUND = 200;
 
+	public static final int RING_OF_SHADOWS_TELEPORT = 10134;
+	public static final int RING_OF_SHADOWS_WHITE_GRAPHIC = 2420;
+	public static final int RING_OF_SHADOWS_RED_GRAPHIC= 2419;
+	public static final int RING_OF_SHADOWS_BLACK_GRAPHIC= 2421;
+	public static final int RING_OF_SHADOWS_GRAY_GRAPHIC= 2418;
+	public static final int RING_OF_SHADOWS_ALL_GRAPHIC= 2417;
+	public static final int RING_OF_SHADOWS_TELEPORT_SOUND = 200;
+
+
+
 	private AnimationConstants() {}
 
 	public static boolean isTeleportAnimation(int animationId)

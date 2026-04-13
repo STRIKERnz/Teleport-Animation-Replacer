@@ -20,6 +20,11 @@ public interface TpreplacerConfig extends Config
 		position = 1)
 	String perSection = "per";
 
+	@ConfigSection(name = "Custom",
+		description = "Custom IDs for testing (animation, graphic, sound)",
+		position = 2)
+	String customSection = "custom";
+
 
 	// ---- Global ----
 
@@ -33,6 +38,18 @@ public interface TpreplacerConfig extends Config
 	default TeleportAnimation teleportAnimation()
 	{
 		return TeleportAnimation.COWBELL;
+	}
+
+	@ConfigItem(
+		keyName = "customIds",
+		name = "Custom IDs",
+		description = "Comma-separated animation,graphic,sound ids to use when 'Custom' is selected. Use -1 to disable an entry (e.g. 714,111,200)",
+		position = 0,
+		section = customSection
+	)
+	default String customIds()
+	{
+		return "-1,-1,-1";
 	}
 
 
@@ -68,9 +85,12 @@ public interface TpreplacerConfig extends Config
 	@ConfigItem(keyName = "per_overrideExplorersRing", name = "Explorers Ring", description = "Per-teleport animation (None uses global setting)", position = 9, section = perSection)
 	default TeleportAnimation perOverrideExplorersRing() { return TeleportAnimation.NONE; }
 
-	@ConfigItem(keyName = "per_overridePharaohsSceptre", name = "Pharaoh's Sceptre", description = "Per-teleport animation (None uses global setting)", position = 10, section = perSection)
+	@ConfigItem(keyName = "per_overrideRingOfShadows", name = "Ring of Shadows", description = "Per-teleport animation (None uses global setting)", position = 10, section = perSection)
+	default TeleportAnimation perOverrideRingOfShadows() { return TeleportAnimation.NONE; }
+
+	@ConfigItem(keyName = "per_overridePharaohsSceptre", name = "Pharaoh's Sceptre", description = "Per-teleport animation (None uses global setting)", position = 11, section = perSection)
 	default TeleportAnimation perOverridePharaohsSceptre() { return TeleportAnimation.NONE; }
 
-	@ConfigItem(keyName = "per_overrideGiantsoulAmulet", name = "Giantsoul Amulet", description = "Per-teleport animation (None uses global setting)", position = 11, section = perSection)
+	@ConfigItem(keyName = "per_overrideGiantsoulAmulet", name = "Giantsoul Amulet", description = "Per-teleport animation (None uses global setting)", position = 12, section = perSection)
 	default TeleportAnimation perOverrideGiantsoulAmulet() { return TeleportAnimation.NONE; }
 }

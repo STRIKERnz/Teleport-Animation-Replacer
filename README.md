@@ -14,6 +14,9 @@ A RuneLite plugin that replaces teleport animations with an alternative animatio
   - Ardougne Cape teleport
   - Desert Amulet teleport
   - Giantsoul Amulet teleport
+  - Explorer's ring teleport - spawns the graphic under the player instead of the usual animation
+  - Pharoh's Sceptre teleport
+  - Ring of Shadows colour variants
 
 ## Default behavior
 By default the plugin replaces all teleports with the Cowbell Amulet animation.
@@ -22,6 +25,7 @@ By default the plugin replaces all teleports with the Cowbell Amulet animation.
 Open the plugin settings in RuneLite and configure:
 - **Override All** — the global animation applied to all teleports.
 - **Per Teleport** section — set a specific animation per teleport type; "None (Use Global)" falls back to the global setting
+- **Custom Options** — Advanced users can specify custom animation, graphic and sound IDs for each teleport type, allowing for anything, to be used as a replacement.
 
 ## Notes
 - This plugin is cosmetic only — it does not change teleport mechanics.
