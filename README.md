@@ -14,7 +14,6 @@ A RuneLite plugin that replaces teleport animations with an alternative animatio
   - Ardougne Cape teleport
   - Desert Amulet teleport
   - Giantsoul Amulet teleport
-  - Explorer's ring teleport - spawns the graphic under the player instead of the usual animation
   - Pharoh's Sceptre teleport
   - Ring of Shadows colour variants
 
