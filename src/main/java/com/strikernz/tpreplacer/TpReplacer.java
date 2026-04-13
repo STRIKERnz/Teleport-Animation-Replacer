@@ -366,16 +366,13 @@ public class TpReplacer extends Plugin
 			case DESERT_AMULET:
 				perOverride = config.perOverrideDesertAmulet();
 				break;
-			case EXPLORERS_RING:
-				perOverride = config.perOverrideExplorersRing();
-				break;
-			case RING_OF_SHADOWS_WHITE:
-			case RING_OF_SHADOWS_RED:
-			case RING_OF_SHADOWS_BLACK:
-			case RING_OF_SHADOWS_GRAY:
-			case RING_OF_SHADOWS_ALL:
-				perOverride = config.perOverrideRingOfShadows();
-				break;
+//			case RING_OF_SHADOWS_WHITE:
+//			case RING_OF_SHADOWS_RED:
+//			case RING_OF_SHADOWS_BLACK:
+//			case RING_OF_SHADOWS_GRAY:
+//			case RING_OF_SHADOWS_ALL:
+//				perOverride = config.perOverrideRingOfShadows();
+//				break;
 			case PHARAOHS_SCEPTRE:
 				perOverride = config.perOverridePharaohsSceptre();
 				break;
