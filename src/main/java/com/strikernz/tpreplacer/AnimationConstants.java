@@ -49,9 +49,6 @@ public final class AnimationConstants
 	public static final int GIANTSOUL_AMULET_TELEPORT_GRAPHIC = 3226;
 	public static final int GIANTSOUL_AMULET_TELEPORT_SOUND = 10193;
 
-	public static final int EXPLORERS_RING_TELEPORT = 3869;
-	public static final int EXPLORERS_RING_TELEPORT_GRAPHIC = 285;
-
 	public static final int PHARAOHS_SCEPTRE_TELEPORT = 2881;
 	public static final int PHARAOHS_SCEPTRE_TELEPORT_GRAPHIC = 715;
 	public static final int PHARAOHS_SCEPTRE_TELEPORT_SOUND = 200;
@@ -62,7 +59,7 @@ public final class AnimationConstants
 	public static final int RING_OF_SHADOWS_BLACK_GRAPHIC= 2421;
 	public static final int RING_OF_SHADOWS_GRAY_GRAPHIC= 2418;
 	public static final int RING_OF_SHADOWS_ALL_GRAPHIC= 2417;
-	public static final int RING_OF_SHADOWS_TELEPORT_SOUND = 200;
+	public static final int RING_OF_SHADOWS_TELEPORT_SOUND = 6833;
 
 
 
