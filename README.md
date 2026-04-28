@@ -16,6 +16,7 @@ A RuneLite plugin that replaces teleport animations with an alternative animatio
   - Giantsoul Amulet teleport
   - Pharoh's Sceptre teleport
   - Ring of Shadows colour variants
+  - Pendent of Ates teleport
 
 ## Default behavior
 By default the plugin replaces all teleports with the Cowbell Amulet animation.
@@ -30,4 +31,4 @@ Open the plugin settings in RuneLite and configure:
 - This plugin is cosmetic only — it does not change teleport mechanics.
 
 ## Version - see changelog for changes
-Current version 1.0.2
+Current version 1.0.3
