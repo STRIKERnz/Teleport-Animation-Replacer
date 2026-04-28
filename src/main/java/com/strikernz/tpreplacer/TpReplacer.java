@@ -58,6 +58,12 @@ public class TpReplacer extends Plugin
 	private int lastPlayedSoundId = -1;
 	private int lastPlayedSoundTick = -1;
 
+	/** Arrival specifics for two-phase teleports (animation, graphic, sound, delay in ticks). */
+	private int arrivalAnimationId = -1;
+	private int arrivalGraphicId = -1;
+	private int arrivalSoundId = -1;
+	private int arrivalSoundDelay = ARRIVAL_SOUND_DELAY_TICKS;
+
 	/** Original-sound-id to tick at which the mute expires (inclusive). */
 	private final Map<Integer, Integer> mutedSoundUntilTick = new HashMap<>();
 
@@ -66,6 +72,10 @@ public class TpReplacer extends Plugin
 	{
 		teleporting = false;
 		arrivalSoundTicksRemaining = -1;
+		arrivalAnimationId = -1;
+		arrivalGraphicId = -1;
+		arrivalSoundId = -1;
+		arrivalSoundDelay = ARRIVAL_SOUND_DELAY_TICKS;
 		lastPlayedSoundId = -1;
 		lastPlayedSoundTick = -1;
 		mutedSoundUntilTick.clear();
@@ -76,6 +86,10 @@ public class TpReplacer extends Plugin
 	{
 		teleporting = false;
 		arrivalSoundTicksRemaining = -1;
+		arrivalAnimationId = -1;
+		arrivalGraphicId = -1;
+		arrivalSoundId = -1;
+		arrivalSoundDelay = ARRIVAL_SOUND_DELAY_TICKS;
 		lastPlayedSoundId = -1;
 		lastPlayedSoundTick = -1;
 		mutedSoundUntilTick.clear();
@@ -92,13 +106,34 @@ public class TpReplacer extends Plugin
 		Player player = client.getLocalPlayer();
 		int animationId = player.getAnimation();
 
-		// Cowbell arrival: play the landing graphic and sound when the teleport ends
+		// Two-phase teleport arrival: play landing animation/graphic and schedule arrival sound when the teleport ends
 		if (teleporting && animationId == -1)
 		{
 			teleporting = false;
-			player.setGraphic(AnimationConstants.COWBELL_TELEPORT_GRAPHIC);
-			arrivalSoundTicksRemaining = ARRIVAL_SOUND_DELAY_TICKS;
+
+			if (arrivalAnimationId != -1)
+			{
+				player.setAnimation(arrivalAnimationId);
+			}
+
+			if (arrivalGraphicId != -1)
+			{
+				player.setGraphic(arrivalGraphicId);
+			}
+
+			arrivalSoundTicksRemaining = arrivalSoundDelay;
 			return;
+		}
+
+		// Suppress the Pendent of Ates arrival animation when the pendent is being overridden
+		if (animationId == AnimationConstants.PENDENT_OF_ATES_TELEPORT_ARRIVAL)
+		{
+			TeleportAnimation pendentSelected = getSelectedForAnimation(AnimationConstants.PENDENT_OF_ATES_TELEPORT);
+			if (pendentSelected != TeleportAnimation.NONE && pendentSelected != TeleportAnimation.PENDENT_OF_ATES)
+			{
+				player.setAnimation(-1);
+				return;
+			}
 		}
 
 		if (!AnimationConstants.isTeleportAnimation(animationId))
@@ -138,8 +173,11 @@ public class TpReplacer extends Plugin
 
 		int selectedAnimationId = selected == TeleportAnimation.CUSTOM ? parsedCustomAnim : selected.getAnimationId();
 
-		// Already playing the target animation
-		if (selectedAnimationId != -1 && animationId == selectedAnimationId)
+		// Already playing the target animation AND graphic — nothing to override
+		int selectedGraphicId = (selected == TeleportAnimation.CUSTOM) ? -1 : selected.getGraphicId();
+		boolean sameAnimation = selectedAnimationId != -1 && animationId == selectedAnimationId;
+		boolean sameGraphic = selectedGraphicId == -1 || selectedGraphicId == player.getGraphic();
+		if (sameAnimation && sameGraphic)
 		{
 			return;
 		}
@@ -159,6 +197,35 @@ public class TpReplacer extends Plugin
 			teleporting = true;
 			player.setAnimation(AnimationConstants.COWBELL_TELEPORT);
 			player.setGraphic(AnimationConstants.COWBELL_TELEPORT_GRAPHIC);
+
+			// Configure arrival specifics for cowbell
+			arrivalAnimationId = -1;
+			arrivalGraphicId = AnimationConstants.COWBELL_TELEPORT_GRAPHIC;
+			arrivalSoundId = AnimationConstants.COWBELL_ARRIVAL_SOUND;
+			arrivalSoundDelay = ARRIVAL_SOUND_DELAY_TICKS;
+
+			return;
+		}
+
+		// Pendent of Ates: two-phase teleport with a specific arrival animation/graphic and same sound on arrival
+		if (selected == TeleportAnimation.PENDENT_OF_ATES)
+		{
+			teleporting = true;
+			player.setAnimation(AnimationConstants.PENDENT_OF_ATES_TELEPORT);
+			player.setGraphic(AnimationConstants.PENDENT_OF_ATES_TELEPORT_GRAPHIC);
+
+			// Configure arrival specifics for pendent — play sound immediately on landing (0 tick delay)
+			arrivalAnimationId = AnimationConstants.PENDENT_OF_ATES_TELEPORT_ARRIVAL;
+			arrivalGraphicId = AnimationConstants.PENDENT_OF_ATES_TELEPORT_ARRIVAL_GRAPHIC;
+			arrivalSoundId = AnimationConstants.PENDENT_OF_ATES_TELEPORT_SOUND;
+			arrivalSoundDelay = 0;
+
+			// Play the initial teleport sound immediately for the pendent cast
+			if (arrivalSoundId != -1)
+			{
+				playSoundOnce(arrivalSoundId);
+			}
+
 			return;
 		}
 
@@ -241,6 +308,7 @@ public class TpReplacer extends Plugin
 		int tick = client.getTickCount();
 		mutedSoundUntilTick.values().removeIf(expire -> expire < tick);
 
+
 		if (arrivalSoundTicksRemaining < 0)
 		{
 			return;
@@ -248,7 +316,7 @@ public class TpReplacer extends Plugin
 
 		if (arrivalSoundTicksRemaining == 0)
 		{
-			playSoundOnce(AnimationConstants.COWBELL_ARRIVAL_SOUND);
+			playSoundOnce(arrivalSoundId);
 			arrivalSoundTicksRemaining = -1;
 		}
 		else
@@ -257,15 +325,10 @@ public class TpReplacer extends Plugin
 		}
 	}
 
+
 	@Subscribe
 	public void onSoundEffectPlayed(SoundEffectPlayed event)
 	{
-
-		if (event.getSource() != client.getLocalPlayer())
-		{
-			return;
-		}
-
 		int soundId = event.getSoundId();
 		int tick = client.getTickCount();
 
@@ -275,9 +338,30 @@ public class TpReplacer extends Plugin
 			return;
 		}
 
-		if (mutedSoundUntilTick.getOrDefault(soundId, -1) >= tick)
+		boolean isLocalPlayer = event.getSource() == client.getLocalPlayer();
+
+		// Mute map only applies to sounds sourced to the local player
+		if (isLocalPlayer && mutedSoundUntilTick.getOrDefault(soundId, -1) >= tick)
 		{
 			event.consume();
+			return;
+		}
+
+		// Suppress known teleport sounds when they are being overridden.
+		if (KNOWN_TELEPORT_SOUNDS.contains(soundId))
+		{
+			for (TeleportAnimation ta : TeleportAnimation.values())
+			{
+				if (ta.getSoundId() == soundId)
+				{
+					TeleportAnimation selected = getSelectedForAnimation(ta.getAnimationId());
+					if (selected != TeleportAnimation.NONE && selected != ta)
+					{
+						event.consume();
+					}
+					break;
+				}
+			}
 		}
 	}
 
@@ -291,6 +375,14 @@ public class TpReplacer extends Plugin
 		// Don't suppress a sound the plugin itself just triggered
 		if (soundId == lastPlayedSoundId && tick == lastPlayedSoundTick)
 		{
+			return;
+		}
+
+		// First, honor explicit mutes we added when replacing teleports. This avoids races where
+		// area sounds arrive before other logic and ensures replaced teleport sounds are consumed.
+		if (mutedSoundUntilTick.getOrDefault(soundId, -1) >= tick)
+		{
+			event.consume();
 			return;
 		}
 
@@ -311,11 +403,6 @@ public class TpReplacer extends Plugin
 			}
 		}
 
-		// Fallback: the mute map covers late-arriving area sounds
-		if (mutedSoundUntilTick.getOrDefault(soundId, -1) >= tick)
-		{
-			event.consume();
-		}
 	}
 
 	@Provides
@@ -366,13 +453,16 @@ public class TpReplacer extends Plugin
 			case DESERT_AMULET:
 				perOverride = config.perOverrideDesertAmulet();
 				break;
-//			case RING_OF_SHADOWS_WHITE:
-//			case RING_OF_SHADOWS_RED:
-//			case RING_OF_SHADOWS_BLACK:
-//			case RING_OF_SHADOWS_GRAY:
-//			case RING_OF_SHADOWS_ALL:
-//				perOverride = config.perOverrideRingOfShadows();
-//				break;
+			case PENDENT_OF_ATES:
+				perOverride = config.perOverridePendentOfAtes();
+				break;
+			case RING_OF_SHADOWS_WHITE:
+			case RING_OF_SHADOWS_RED:
+			case RING_OF_SHADOWS_BLACK:
+			case RING_OF_SHADOWS_GRAY:
+			case RING_OF_SHADOWS_ALL:
+				perOverride = config.perOverrideRingOfShadows();
+				break;
 			case PHARAOHS_SCEPTRE:
 				perOverride = config.perOverridePharaohsSceptre();
 				break;

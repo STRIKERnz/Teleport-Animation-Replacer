@@ -55,11 +55,17 @@ public final class AnimationConstants
 
 	public static final int RING_OF_SHADOWS_TELEPORT = 10134;
 	public static final int RING_OF_SHADOWS_WHITE_GRAPHIC = 2420;
-	public static final int RING_OF_SHADOWS_RED_GRAPHIC= 2419;
-	public static final int RING_OF_SHADOWS_BLACK_GRAPHIC= 2421;
-	public static final int RING_OF_SHADOWS_GRAY_GRAPHIC= 2418;
-	public static final int RING_OF_SHADOWS_ALL_GRAPHIC= 2417;
+	public static final int RING_OF_SHADOWS_RED_GRAPHIC = 2419;
+	public static final int RING_OF_SHADOWS_BLACK_GRAPHIC = 2421;
+	public static final int RING_OF_SHADOWS_GRAY_GRAPHIC = 2418;
+	public static final int RING_OF_SHADOWS_ALL_GRAPHIC = 2417;
 	public static final int RING_OF_SHADOWS_TELEPORT_SOUND = 6833;
+
+	public static final int PENDENT_OF_ATES_TELEPORT = 4018;
+	public static final int PENDENT_OF_ATES_TELEPORT_GRAPHIC = 2754;
+	public static final int PENDENT_OF_ATES_TELEPORT_ARRIVAL_GRAPHIC = 2755;
+	public static final int PENDENT_OF_ATES_TELEPORT_ARRIVAL = 10956;
+	public static final int PENDENT_OF_ATES_TELEPORT_SOUND = 1490;
 
 
 
