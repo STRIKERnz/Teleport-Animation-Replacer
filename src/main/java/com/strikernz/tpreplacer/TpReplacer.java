@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
 import net.runelite.api.Player;
+import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.AnimationChanged;
 import net.runelite.api.events.AreaSoundEffectPlayed;
 import net.runelite.api.events.GameTick;
@@ -110,6 +111,13 @@ public class TpReplacer extends Plugin
 		if (teleporting && animationId == -1)
 		{
 			teleporting = false;
+
+			// Skip arrival effects inside the (Corrupted) Gauntlet to prevent the character from getting stuck
+			if (isInGauntlet())
+			{
+				arrivalSoundTicksRemaining = -1;
+				return;
+			}
 
 			if (arrivalAnimationId != -1)
 			{
@@ -316,7 +324,10 @@ public class TpReplacer extends Plugin
 
 		if (arrivalSoundTicksRemaining == 0)
 		{
-			playSoundOnce(arrivalSoundId);
+			if (!isInGauntlet())
+			{
+				playSoundOnce(arrivalSoundId);
+			}
 			arrivalSoundTicksRemaining = -1;
 		}
 		else
@@ -474,6 +485,22 @@ public class TpReplacer extends Plugin
 		}
 
 		return (perOverride != TeleportAnimation.NONE) ? perOverride : config.teleportAnimation();
+	}
+
+	/**
+	 * Returns true when the local player is inside the (Corrupted) Gauntlet instance.
+	 */
+	private boolean isInGauntlet()
+	{
+		Player player = client.getLocalPlayer();
+		if (player == null)
+		{
+			return false;
+		}
+		WorldPoint wp = WorldPoint.fromLocalInstance(client, player.getLocalLocation());
+		int region = wp.getRegionID();
+		return region == AnimationConstants.CORRUPTED_GAUNTLET_REGION
+			|| region == AnimationConstants.GAUNTLET_REGION;
 	}
 
 	/**

@@ -67,7 +67,9 @@ public final class AnimationConstants
 	public static final int PENDENT_OF_ATES_TELEPORT_ARRIVAL = 10956;
 	public static final int PENDENT_OF_ATES_TELEPORT_SOUND = 1490;
 
-
+	// ---- Region IDs ----
+	public static final int CORRUPTED_GAUNTLET_REGION = 7768;
+	public static final int GAUNTLET_REGION = 7512;
 
 	private AnimationConstants() {}
 
