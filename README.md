@@ -14,7 +14,7 @@ A RuneLite plugin that replaces teleport animations with an alternative animatio
   - Ardougne Cape teleport
   - Desert Amulet teleport
   - Giantsoul Amulet teleport
-  - Pharoh's Sceptre teleport
+  - Pharaoh's Sceptre teleport
   - Ring of Shadows colour variants
   - Pendent of Ates teleport
 
@@ -35,6 +35,15 @@ Open the plugin settings in RuneLite and configure:
 # Changelog
 
 All notable changes to this project will be documented here
+
+## [1.0.5] - 2026-05-04
+### Fixed
+- Prevented client-only arrival animations from leaving the local player in a stuck visual state after teleporting.
+- Replaced deprecated graphic APIs with RuneLite spot animation APIs.
+
+### Changed
+- Cleaned up teleport override state handling, custom ID parsing, and sound suppression lookups.
+- Reformatted config and preset declarations for easier maintenance.
 
 ## [1.0.4] - 2026-05-02
 ### Fixed
