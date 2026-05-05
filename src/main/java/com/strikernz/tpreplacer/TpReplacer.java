@@ -1,11 +1,13 @@
 package com.strikernz.tpreplacer;
 
 import com.google.inject.Provides;
+import net.runelite.api.ActorSpotAnim;
 import net.runelite.api.Client;
 import net.runelite.api.Player;
 import net.runelite.api.events.AnimationChanged;
 import net.runelite.api.events.AreaSoundEffectPlayed;
 import net.runelite.api.events.GameTick;
+import net.runelite.api.events.GraphicChanged;
 import net.runelite.api.events.SoundEffectPlayed;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
@@ -24,6 +26,7 @@ public class TpReplacer extends Plugin {
     private static final int NO_ID = -1;
     private static final int ARRIVAL_SOUND_DELAY_TICKS = 2;
     private static final int ORIGINAL_SOUND_MUTE_TICKS = 3;
+    private static final int ORIGINAL_GRAPHIC_SUPPRESS_TICKS = 3;
     private static final int ARRIVAL_ANIMATION_RESET_TICKS = 1;
 
     /**
@@ -43,6 +46,7 @@ public class TpReplacer extends Plugin {
      * Original-sound-id to tick at which the mute expires (inclusive).
      */
     private final Map<Integer, Integer> mutedSoundUntilTick = new HashMap<>();
+    private final Map<Integer, Integer> suppressedGraphicUntilTick = new HashMap<>();
     @Inject
     private Client client;
     @Inject
@@ -154,7 +158,7 @@ public class TpReplacer extends Plugin {
         // Already playing the target animation AND graphic — nothing to override
         int selectedGraphicId = selected == TeleportAnimation.CUSTOM ? customIds.graphicId : selected.getGraphicId();
         boolean sameAnimation = selectedAnimationId != NO_ID && animationId == selectedAnimationId;
-        boolean sameGraphic = selectedGraphicId == NO_ID || player.hasSpotAnim(selectedGraphicId);
+        boolean sameGraphic = selectedGraphicId != NO_ID && player.hasSpotAnim(selectedGraphicId);
         if (sameAnimation && sameGraphic) {
             return;
         }
@@ -162,10 +166,13 @@ public class TpReplacer extends Plugin {
         // Mute the original teleport sound so it doesn't double-play
         TeleportAnimation original = TeleportAnimation.fromAnimationId(animationId);
         int originalSound = (original != null) ? original.getSoundId() : NO_ID;
+        int originalGraphic = (original != null) ? original.getGraphicId() : NO_ID;
 
         if (originalSound != NO_ID) {
             mutedSoundUntilTick.put(originalSound, client.getTickCount() + ORIGINAL_SOUND_MUTE_TICKS);
         }
+
+        suppressOriginalGraphic(player, originalGraphic, selectedGraphicId);
 
         clearPendingArrival();
 
@@ -243,6 +250,8 @@ public class TpReplacer extends Plugin {
         // Expire old mute entries
         int tick = client.getTickCount();
         mutedSoundUntilTick.values().removeIf(expire -> expire < tick);
+        suppressedGraphicUntilTick.values().removeIf(expire -> expire < tick);
+        removeSuppressedSpotAnims(client.getLocalPlayer());
 
         updateArrivalAnimationReset(client.getLocalPlayer());
 
@@ -305,6 +314,16 @@ public class TpReplacer extends Plugin {
 
     }
 
+    @Subscribe
+    public void onGraphicChanged(GraphicChanged event) {
+        Player player = client.getLocalPlayer();
+        if (player == null || event.getActor() != player) {
+            return;
+        }
+
+        removeSuppressedSpotAnims(player);
+    }
+
     @Provides
     TpreplacerConfig provideConfig(ConfigManager configManager) {
         return configManager.getConfig(TpreplacerConfig.class);
@@ -316,6 +335,7 @@ public class TpReplacer extends Plugin {
         lastPlayedSoundId = NO_ID;
         lastPlayedSoundTick = NO_ID;
         mutedSoundUntilTick.clear();
+        suppressedGraphicUntilTick.clear();
     }
 
     private void clearPendingArrival() {
@@ -374,6 +394,41 @@ public class TpReplacer extends Plugin {
     private void playSpotAnim(Player player, int spotAnimId) {
         if (spotAnimId != NO_ID) {
             player.createSpotAnim(spotAnimId, spotAnimId, 0, 0);
+        }
+    }
+
+    private void suppressOriginalGraphic(Player player, int originalGraphicId, int replacementGraphicId) {
+        if (originalGraphicId == NO_ID || originalGraphicId == replacementGraphicId) {
+            return;
+        }
+
+        suppressedGraphicUntilTick.put(originalGraphicId, client.getTickCount() + ORIGINAL_GRAPHIC_SUPPRESS_TICKS);
+        removeSpotAnim(player, originalGraphicId);
+    }
+
+    private void removeSuppressedSpotAnims(Player player) {
+        int tick = client.getTickCount();
+        for (int graphicId : suppressedGraphicUntilTick.keySet()) {
+            if (suppressedGraphicUntilTick.getOrDefault(graphicId, NO_ID) >= tick) {
+                removeSpotAnim(player, graphicId);
+            }
+        }
+    }
+
+    private void removeSpotAnim(Player player, int spotAnimId) {
+        if (spotAnimId == NO_ID) {
+            return;
+        }
+
+        List<Integer> keysToRemove = new ArrayList<>();
+        for (ActorSpotAnim spotAnim : player.getSpotAnims()) {
+            if (spotAnim.getId() == spotAnimId) {
+                keysToRemove.add((int) spotAnim.getHash());
+            }
+        }
+
+        for (int key : keysToRemove) {
+            player.removeSpotAnim(key);
         }
     }
 
