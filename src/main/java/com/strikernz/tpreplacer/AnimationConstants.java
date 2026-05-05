@@ -29,7 +29,7 @@ public final class AnimationConstants {
     public static final int TAB_TELEPORT_SOUND = 965;
 
     public static final int TELEPORT_SCROLLS = 3864;
-    public static final int TELEPORT_SCROLLS_GRAPHIC = 111;
+    public static final int TELEPORT_SCROLLS_GRAPHIC = -1;
     public static final int TELEPORT_SCROLLS_SOUND = 200;
 
     public static final int ECTOPHIAL_TELEPORT = 878;

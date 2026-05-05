@@ -8,7 +8,9 @@ import net.runelite.api.events.AnimationChanged;
 import net.runelite.api.events.AreaSoundEffectPlayed;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.GraphicChanged;
+import net.runelite.api.events.GraphicsObjectCreated;
 import net.runelite.api.events.SoundEffectPlayed;
+import net.runelite.api.coords.LocalPoint;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
@@ -27,6 +29,8 @@ public class TpReplacer extends Plugin {
     private static final int ARRIVAL_SOUND_DELAY_TICKS = 2;
     private static final int ORIGINAL_SOUND_MUTE_TICKS = 3;
     private static final int ORIGINAL_GRAPHIC_SUPPRESS_TICKS = 3;
+    private static final int SCROLL_VISUAL_SUPPRESS_TICKS = 3;
+    private static final int LOCAL_TILE_SIZE = 128;
     private static final int ARRIVAL_ANIMATION_RESET_TICKS = 1;
 
     /**
@@ -76,6 +80,7 @@ public class TpReplacer extends Plugin {
     private int arrivalGraphicId = NO_ID;
     private int arrivalSoundId = NO_ID;
     private int arrivalSoundDelay = ARRIVAL_SOUND_DELAY_TICKS;
+    private int scrollVisualSuppressUntilTick = NO_ID;
 
     private static CustomTeleportIds parseCustomIds(String ids) {
         if (ids == null || ids.trim().isEmpty()) {
@@ -121,6 +126,11 @@ public class TpReplacer extends Plugin {
 
         int animationId = player.getAnimation();
 
+        if (shouldSuppressScrollVisual() && animationId == AnimationConstants.TELEPORT_SCROLLS) {
+            clearScrollAnimation(player);
+            return;
+        }
+
         // Two-phase teleport arrival: play landing effects when the cast animation ends.
         if (teleporting && animationId == NO_ID) {
             teleporting = false;
@@ -148,6 +158,11 @@ public class TpReplacer extends Plugin {
             return;
         }
 
+        TeleportAnimation original = TeleportAnimation.fromAnimationId(animationId);
+        if (selected == original) {
+            return;
+        }
+
         CustomTeleportIds customIds = selected == TeleportAnimation.CUSTOM
                 ? parseCustomIds(config.customIds())
                 : CustomTeleportIds.EMPTY;
@@ -164,7 +179,6 @@ public class TpReplacer extends Plugin {
         }
 
         // Mute the original teleport sound so it doesn't double-play
-        TeleportAnimation original = TeleportAnimation.fromAnimationId(animationId);
         int originalSound = (original != null) ? original.getSoundId() : NO_ID;
         int originalGraphic = (original != null) ? original.getGraphicId() : NO_ID;
 
@@ -173,6 +187,7 @@ public class TpReplacer extends Plugin {
         }
 
         suppressOriginalGraphic(player, originalGraphic, selectedGraphicId);
+        suppressSourceAnimationGraphic(player, original, selectedAnimationId);
 
         clearPendingArrival();
 
@@ -252,6 +267,12 @@ public class TpReplacer extends Plugin {
         mutedSoundUntilTick.values().removeIf(expire -> expire < tick);
         suppressedGraphicUntilTick.values().removeIf(expire -> expire < tick);
         removeSuppressedSpotAnims(client.getLocalPlayer());
+        if (scrollVisualSuppressUntilTick < tick) {
+            scrollVisualSuppressUntilTick = NO_ID;
+        }
+        if (shouldSuppressScrollVisual() && client.getLocalPlayer().getAnimation() == AnimationConstants.TELEPORT_SCROLLS) {
+            clearScrollAnimation(client.getLocalPlayer());
+        }
 
         updateArrivalAnimationReset(client.getLocalPlayer());
 
@@ -324,6 +345,22 @@ public class TpReplacer extends Plugin {
         removeSuppressedSpotAnims(player);
     }
 
+    @Subscribe
+    public void onGraphicsObjectCreated(GraphicsObjectCreated event) {
+        Player player = client.getLocalPlayer();
+        if (player == null || !shouldSuppressScrollVisual()) {
+            return;
+        }
+
+        LocalPoint playerLocation = player.getLocalLocation();
+        LocalPoint graphicLocation = event.getGraphicsObject().getLocation();
+        if (playerLocation != null
+                && graphicLocation != null
+                && playerLocation.distanceTo(graphicLocation) <= LOCAL_TILE_SIZE) {
+            event.getGraphicsObject().setFinished(true);
+        }
+    }
+
     @Provides
     TpreplacerConfig provideConfig(ConfigManager configManager) {
         return configManager.getConfig(TpreplacerConfig.class);
@@ -336,6 +373,7 @@ public class TpReplacer extends Plugin {
         lastPlayedSoundTick = NO_ID;
         mutedSoundUntilTick.clear();
         suppressedGraphicUntilTick.clear();
+        scrollVisualSuppressUntilTick = NO_ID;
     }
 
     private void clearPendingArrival() {
@@ -404,6 +442,24 @@ public class TpReplacer extends Plugin {
 
         suppressedGraphicUntilTick.put(originalGraphicId, client.getTickCount() + ORIGINAL_GRAPHIC_SUPPRESS_TICKS);
         removeSpotAnim(player, originalGraphicId);
+    }
+
+    private void suppressSourceAnimationGraphic(Player player, TeleportAnimation original, int replacementAnimationId) {
+        if (original != TeleportAnimation.SCROLL || replacementAnimationId == original.getAnimationId()) {
+            return;
+        }
+
+        scrollVisualSuppressUntilTick = client.getTickCount() + SCROLL_VISUAL_SUPPRESS_TICKS;
+        clearScrollAnimation(player);
+    }
+
+    private boolean shouldSuppressScrollVisual() {
+        return scrollVisualSuppressUntilTick >= client.getTickCount();
+    }
+
+    private void clearScrollAnimation(Player player) {
+        player.setAnimation(NO_ID);
+        player.setAnimationFrame(0);
     }
 
     private void removeSuppressedSpotAnims(Player player) {
