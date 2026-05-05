@@ -36,6 +36,10 @@ Open the plugin settings in RuneLite and configure:
 
 All notable changes to this project will be documented here
 
+## [1.0.6] - 2026-05-06
+### Fixed
+- graphic suppression handling for teleport animations to prevent visual overlap
+
 ## [1.0.5] - 2026-05-04
 ### Fixed
 - Prevented client-only arrival animations from leaving the local player in a stuck visual state after teleporting.
