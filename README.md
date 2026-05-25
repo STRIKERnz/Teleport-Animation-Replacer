@@ -3,10 +3,12 @@ A RuneLite plugin that replaces teleport animations with an alternative animatio
 
 ## Features
 - Replace teleport animations with a selected preset animation (default: Cowbell Amulet).
+- Choose **Random** globally or per teleport type to pick a replacement preset at random each time.
 - Per-teleport-type overrides so you can choose exactly which animation each teleport uses:
   - Normal spellbook teleports and jewellery teleports (rings/amulets)
   - Ancient spellbook teleports
   - Arceuus spellbook teleports
+  - Xeric's Talisman teleport
   - Lunar spellbook teleports
   - Teleport tabs
   - Teleport scrolls
@@ -25,6 +27,7 @@ By default, the plugin replaces all teleports with the Cowbell Amulet animation.
 Open the plugin settings in RuneLite and configure:
 - **Override All** — the global animation applied to all teleports.
 - **Per Teleport** section — set a specific animation per teleport type; "None (Use Global)" falls back to the global setting
+- **Random** — available in both global and per-teleport selectors; picks from the built-in presets and skips None, Custom, and Random itself.
 - **Custom Options** — Advanced users can specify custom animation, graphic and sound IDs for each teleport type, allowing for anything, to be used as a replacement.
 
 ## Notes
@@ -35,6 +38,12 @@ Open the plugin settings in RuneLite and configure:
 # Changelog
 
 All notable changes to this project will be documented here
+
+## [1.0.7] - 2026-05-26
+### Added
+- Random option for the global override and per-teleport overrides.
+- Xeric's Talisman teleport preset: animation 3865, graphic 1612, sound 200.
+- Xeric's Talisman per-teleport override setting.
 
 ## [1.0.6] - 2026-05-06
 ### Fixed

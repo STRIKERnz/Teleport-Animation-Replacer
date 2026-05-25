@@ -20,6 +20,10 @@ public final class AnimationConstants {
     public static final int ARCEUUS_TELEPORT_GRAPHIC = 1296;
     public static final int ARCEUUS_TELEPORT_SOUND = 200;
 
+    public static final int XERIC_TALISMAN_TELEPORT = 3865;
+    public static final int XERIC_TALISMAN_TELEPORT_GRAPHIC = 1612;
+    public static final int XERIC_TALISMAN_TELEPORT_SOUND = 200;
+
     public static final int LUNAR_TELEPORT = 1816;
     public static final int LUNAR_TELEPORT_GRAPHIC = 747;
     public static final int LUNAR_TELEPORT_SOUND = 200;

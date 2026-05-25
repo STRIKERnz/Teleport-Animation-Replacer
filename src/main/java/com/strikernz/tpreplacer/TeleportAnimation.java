@@ -3,8 +3,11 @@ package com.strikernz.tpreplacer;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 /**
  * Teleport animation presets that can be selected in the plugin configuration.
@@ -14,6 +17,7 @@ import java.util.Map;
 public enum TeleportAnimation {
     NONE(-1, -1, -1, "None (Use Global)"),
     CUSTOM(-1, -1, -1, "Custom (Use IDs)"),
+    RANDOM(-1, -1, -1, "Random"),
     COWBELL(AnimationConstants.COWBELL_TELEPORT, AnimationConstants.COWBELL_TELEPORT_GRAPHIC, -1,
             "Cowbell Amulet"),
     STANDARD(AnimationConstants.STANDARD_AND_JEWELLERY_TELEPORT, AnimationConstants.STANDARD_TELEPORT_GRAPHIC,
@@ -22,6 +26,8 @@ public enum TeleportAnimation {
             AnimationConstants.ANCIENT_TELEPORT_SOUND, "Ancient"),
     ARCEUUS(AnimationConstants.ARCEUUS_TELEPORT, AnimationConstants.ARCEUUS_TELEPORT_GRAPHIC,
             AnimationConstants.ARCEUUS_TELEPORT_SOUND, "Arceuus"),
+    XERIC_TALISMAN(AnimationConstants.XERIC_TALISMAN_TELEPORT, AnimationConstants.XERIC_TALISMAN_TELEPORT_GRAPHIC,
+            AnimationConstants.XERIC_TALISMAN_TELEPORT_SOUND, "Xeric's Talisman"),
     LUNAR(AnimationConstants.LUNAR_TELEPORT, AnimationConstants.LUNAR_TELEPORT_GRAPHIC,
             AnimationConstants.LUNAR_TELEPORT_SOUND, "Lunar"),
     TAB(AnimationConstants.TAB_TELEPORT, AnimationConstants.TAB_TELEPORT_GRAPHIC,
@@ -70,6 +76,7 @@ public enum TeleportAnimation {
 
         // Multiple Ring of Shadows enums share the same animation id; explicitly map that id
         // to a sensible default source (white variant) so detection is consistent.
+        BY_ANIMATION_ID.put(AnimationConstants.ARCEUUS_TELEPORT, TeleportAnimation.ARCEUUS);
         BY_ANIMATION_ID.put(AnimationConstants.RING_OF_SHADOWS_TELEPORT, TeleportAnimation.RING_OF_SHADOWS_WHITE);
     }
 
@@ -81,6 +88,29 @@ public enum TeleportAnimation {
     public static TeleportAnimation fromAnimationId(int animationId) {
 
         return BY_ANIMATION_ID.get(animationId);
+    }
+
+    public static TeleportAnimation randomReplacement(Random random, TeleportAnimation source) {
+        List<TeleportAnimation> choices = new ArrayList<>();
+        for (TeleportAnimation ta : values()) {
+            if (ta.isRandomChoice() && ta != source) {
+                choices.add(ta);
+            }
+        }
+
+        if (choices.isEmpty()) {
+            for (TeleportAnimation ta : values()) {
+                if (ta.isRandomChoice()) {
+                    choices.add(ta);
+                }
+            }
+        }
+
+        return choices.get(random.nextInt(choices.size()));
+    }
+
+    private boolean isRandomChoice() {
+        return this != NONE && this != CUSTOM && this != RANDOM;
     }
 
     @Override

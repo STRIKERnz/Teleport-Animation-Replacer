@@ -49,6 +49,7 @@ public class TpReplacer extends Plugin {
     /**
      * Original-sound-id to tick at which the mute expires (inclusive).
      */
+    private final Random random = new Random();
     private final Map<Integer, Integer> mutedSoundUntilTick = new HashMap<>();
     private final Map<Integer, Integer> suppressedGraphicUntilTick = new HashMap<>();
     @Inject
@@ -151,14 +152,14 @@ public class TpReplacer extends Plugin {
             return;
         }
 
-        TeleportAnimation selected = getSelectedForAnimation(animationId);
+        TeleportAnimation selected = getSelectedForPlayerAnimation(player, animationId);
 
         // NONE means "don't override"
         if (selected == TeleportAnimation.NONE) {
             return;
         }
 
-        TeleportAnimation original = TeleportAnimation.fromAnimationId(animationId);
+        TeleportAnimation original = getSourceForPlayerAnimation(player, animationId);
         if (selected == original) {
             return;
         }
@@ -493,9 +494,25 @@ public class TpReplacer extends Plugin {
      * Per-teleport settings take priority; if set to NONE the global setting is used.
      */
     private TeleportAnimation getSelectedForAnimation(int animationId) {
-        TeleportAnimation source = TeleportAnimation.fromAnimationId(animationId);
+        return getSelectedForSource(TeleportAnimation.fromAnimationId(animationId));
+    }
+
+    private TeleportAnimation getSelectedForPlayerAnimation(Player player, int animationId) {
+        return getSelectedForSource(getSourceForPlayerAnimation(player, animationId));
+    }
+
+    private TeleportAnimation getSourceForPlayerAnimation(Player player, int animationId) {
+        if (animationId == AnimationConstants.XERIC_TALISMAN_TELEPORT
+                && player.hasSpotAnim(AnimationConstants.XERIC_TALISMAN_TELEPORT_GRAPHIC)) {
+            return TeleportAnimation.XERIC_TALISMAN;
+        }
+
+        return TeleportAnimation.fromAnimationId(animationId);
+    }
+
+    private TeleportAnimation getSelectedForSource(TeleportAnimation source) {
         if (source == null) {
-            return config.teleportAnimation();
+            return resolveRandomSelection(config.teleportAnimation(), null);
         }
 
         TeleportAnimation perOverride;
@@ -508,6 +525,9 @@ public class TpReplacer extends Plugin {
                 break;
             case ARCEUUS:
                 perOverride = config.perOverrideArceuus();
+                break;
+            case XERIC_TALISMAN:
+                perOverride = config.perOverrideXericTalisman();
                 break;
             case LUNAR:
                 perOverride = config.perOverrideLunar();
@@ -544,10 +564,19 @@ public class TpReplacer extends Plugin {
                 perOverride = config.perOverrideGiantsoulAmulet();
                 break;
             default:
-                return config.teleportAnimation();
+                return resolveRandomSelection(config.teleportAnimation(), source);
         }
 
-        return (perOverride != TeleportAnimation.NONE) ? perOverride : config.teleportAnimation();
+        TeleportAnimation selected = (perOverride != TeleportAnimation.NONE) ? perOverride : config.teleportAnimation();
+        return resolveRandomSelection(selected, source);
+    }
+
+    private TeleportAnimation resolveRandomSelection(TeleportAnimation selected, TeleportAnimation source) {
+        if (selected != TeleportAnimation.RANDOM) {
+            return selected;
+        }
+
+        return TeleportAnimation.randomReplacement(random, source);
     }
 
     /**
