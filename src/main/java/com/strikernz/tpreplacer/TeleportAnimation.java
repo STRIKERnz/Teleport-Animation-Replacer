@@ -22,6 +22,14 @@ public enum TeleportAnimation {
             "Cowbell Amulet"),
     STANDARD(AnimationConstants.STANDARD_AND_JEWELLERY_TELEPORT, AnimationConstants.STANDARD_TELEPORT_GRAPHIC,
             AnimationConstants.STANDARD_TELEPORT_SOUND, "Standard / Jewellery"),
+    EXPLORERS_RING(AnimationConstants.EXPLORERS_RING_TELEPORT, AnimationConstants.EXPLORERS_RING_TELEPORT_GRAPHIC,
+            AnimationConstants.EXPLORERS_RING_TELEPORT_SOUND, "Explorer's Ring"),
+    ARDOUGNE_FARMING(AnimationConstants.ARDOUGNE_FARMING_TELEPORT,
+            AnimationConstants.ARDOUGNE_FARMING_TELEPORT_GRAPHIC,
+            AnimationConstants.ARDOUGNE_FARMING_TELEPORT_SOUND, "Ardougne Farming"),
+    ROYAL_SEED_POD(AnimationConstants.ROYAL_SEED_POD_TELEPORT,
+            AnimationConstants.ROYAL_SEED_POD_TELEPORT_GRAPHIC,
+            AnimationConstants.ROYAL_SEED_POD_TELEPORT_SOUND, "Royal Seed Pod"),
     ANCIENT(AnimationConstants.ANCIENT_TELEPORT, AnimationConstants.ANCIENT_TELEPORT_GRAPHIC,
             AnimationConstants.ANCIENT_TELEPORT_SOUND, "Ancient"),
     ARCEUUS(AnimationConstants.ARCEUUS_TELEPORT, AnimationConstants.ARCEUUS_TELEPORT_GRAPHIC,
@@ -76,6 +84,8 @@ public enum TeleportAnimation {
 
         // Multiple Ring of Shadows enums share the same animation id; explicitly map that id
         // to a sensible default source (white variant) so detection is consistent.
+        BY_ANIMATION_ID.put(AnimationConstants.EXPLORERS_RING_TELEPORT, TeleportAnimation.EXPLORERS_RING);
+        BY_ANIMATION_ID.put(AnimationConstants.ARDOUGNE_TELEPORT, TeleportAnimation.ARDOUGNE);
         BY_ANIMATION_ID.put(AnimationConstants.ARCEUUS_TELEPORT, TeleportAnimation.ARCEUUS);
         BY_ANIMATION_ID.put(AnimationConstants.RING_OF_SHADOWS_TELEPORT, TeleportAnimation.RING_OF_SHADOWS_WHITE);
     }

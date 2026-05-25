@@ -6,6 +6,9 @@ A RuneLite plugin that replaces teleport animations with an alternative animatio
 - Choose **Random** globally or per teleport type to pick a replacement preset at random each time.
 - Per-teleport-type overrides so you can choose exactly which animation each teleport uses:
   - Normal spellbook teleports and jewellery teleports (rings/amulets)
+  - Explorer's Ring teleport
+  - Ardougne Farming teleport
+  - Royal Seed Pod teleport
   - Ancient spellbook teleports
   - Arceuus spellbook teleports
   - Xeric's Talisman teleport
@@ -42,8 +45,10 @@ All notable changes to this project will be documented here
 ## [1.0.7] - 2026-05-26
 ### Added
 - Random option for the global override and per-teleport overrides.
-- Xeric's Talisman teleport preset: animation 3865, graphic 1612, sound 200.
 - Xeric's Talisman per-teleport override setting.
+- Explorer's Ring per-teleport override setting.
+- Ardougne Farming per-teleport override setting.
+- Royal Seed Pod per-teleport override setting.
 
 ## [1.0.6] - 2026-05-06
 ### Fixed

@@ -63,10 +63,43 @@ public interface TpreplacerConfig extends Config {
     }
 
     @ConfigItem(
+            keyName = "per_overrideExplorersRing",
+            name = "Explorer's Ring",
+            description = "Per-teleport animation (None uses global setting)",
+            position = 1,
+            section = perSection
+    )
+    default TeleportAnimation perOverrideExplorersRing() {
+        return TeleportAnimation.NONE;
+    }
+
+    @ConfigItem(
+            keyName = "per_overrideArdougneFarming",
+            name = "Ardougne Farming",
+            description = "Per-teleport animation (None uses global setting)",
+            position = 2,
+            section = perSection
+    )
+    default TeleportAnimation perOverrideArdougneFarming() {
+        return TeleportAnimation.NONE;
+    }
+
+    @ConfigItem(
+            keyName = "per_overrideRoyalSeedPod",
+            name = "Royal Seed Pod",
+            description = "Per-teleport animation (None uses global setting)",
+            position = 3,
+            section = perSection
+    )
+    default TeleportAnimation perOverrideRoyalSeedPod() {
+        return TeleportAnimation.NONE;
+    }
+
+    @ConfigItem(
             keyName = "per_overrideAncient",
             name = "Ancient",
             description = "Per-teleport animation (None uses global setting)",
-            position = 1,
+            position = 4,
             section = perSection
     )
     default TeleportAnimation perOverrideAncient() {
@@ -77,7 +110,7 @@ public interface TpreplacerConfig extends Config {
             keyName = "per_overrideArceuus",
             name = "Arceuus",
             description = "Per-teleport animation (None uses global setting)",
-            position = 2,
+            position = 5,
             section = perSection
     )
     default TeleportAnimation perOverrideArceuus() {
@@ -88,7 +121,7 @@ public interface TpreplacerConfig extends Config {
             keyName = "per_overrideXericTalisman",
             name = "Xeric's Talisman",
             description = "Per-teleport animation (None uses global setting)",
-            position = 3,
+            position = 6,
             section = perSection
     )
     default TeleportAnimation perOverrideXericTalisman() {
@@ -99,7 +132,7 @@ public interface TpreplacerConfig extends Config {
             keyName = "per_overrideLunar",
             name = "Lunar",
             description = "Per-teleport animation (None uses global setting)",
-            position = 4,
+            position = 7,
             section = perSection
     )
     default TeleportAnimation perOverrideLunar() {
@@ -110,7 +143,7 @@ public interface TpreplacerConfig extends Config {
             keyName = "per_overrideTabs",
             name = "Tabs",
             description = "Per-teleport animation (None uses global setting)",
-            position = 5,
+            position = 8,
             section = perSection
     )
     default TeleportAnimation perOverrideTabs() {
@@ -121,7 +154,7 @@ public interface TpreplacerConfig extends Config {
             keyName = "per_overrideScrolls",
             name = "Scrolls",
             description = "Per-teleport animation (None uses global setting)",
-            position = 6,
+            position = 9,
             section = perSection
     )
     default TeleportAnimation perOverrideScrolls() {
@@ -132,7 +165,7 @@ public interface TpreplacerConfig extends Config {
             keyName = "per_overrideEctophial",
             name = "Ectophial",
             description = "Per-teleport animation (None uses global setting)",
-            position = 7,
+            position = 10,
             section = perSection
     )
     default TeleportAnimation perOverrideEctophial() {
@@ -143,7 +176,7 @@ public interface TpreplacerConfig extends Config {
             keyName = "per_overrideArdougne",
             name = "Ardougne Cape",
             description = "Per-teleport animation (None uses global setting)",
-            position = 8,
+            position = 11,
             section = perSection
     )
     default TeleportAnimation perOverrideArdougne() {
@@ -154,7 +187,7 @@ public interface TpreplacerConfig extends Config {
             keyName = "per_overrideDesertAmulet",
             name = "Desert Amulet",
             description = "Per-teleport animation (None uses global setting)",
-            position = 9,
+            position = 12,
             section = perSection
     )
     default TeleportAnimation perOverrideDesertAmulet() {
@@ -165,7 +198,7 @@ public interface TpreplacerConfig extends Config {
             keyName = "per_overridePendentOfAtes",
             name = "Pendent of Ates",
             description = "Per-teleport animation (None uses global setting)",
-            position = 10,
+            position = 13,
             section = perSection
     )
     default TeleportAnimation perOverridePendentOfAtes() {
@@ -176,7 +209,7 @@ public interface TpreplacerConfig extends Config {
             keyName = "per_overrideRingOfShadows",
             name = "Ring of Shadows",
             description = "Per-teleport animation (None uses global setting)",
-            position = 11,
+            position = 14,
             section = perSection
     )
     default TeleportAnimation perOverrideRingOfShadows() {
@@ -187,7 +220,7 @@ public interface TpreplacerConfig extends Config {
             keyName = "per_overridePharaohsSceptre",
             name = "Pharaoh's Sceptre",
             description = "Per-teleport animation (None uses global setting)",
-            position = 12,
+            position = 15,
             section = perSection
     )
     default TeleportAnimation perOverridePharaohsSceptre() {
@@ -198,7 +231,7 @@ public interface TpreplacerConfig extends Config {
             keyName = "per_overrideGiantsoulAmulet",
             name = "Giantsoul Amulet",
             description = "Per-teleport animation (None uses global setting)",
-            position = 13,
+            position = 16,
             section = perSection
     )
     default TeleportAnimation perOverrideGiantsoulAmulet() {

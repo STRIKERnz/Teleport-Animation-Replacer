@@ -12,6 +12,16 @@ public final class AnimationConstants {
     public static final int STANDARD_TELEPORT_GRAPHIC = 111;
     public static final int STANDARD_TELEPORT_SOUND = 200;
 
+    public static final int EXPLORERS_RING_TELEPORT = 3869;
+    public static final int EXPLORERS_RING_TELEPORT_GRAPHIC = 285;
+    public static final int EXPLORERS_RING_TELEPORT_SOUND = -1;
+
+    public static final int ROYAL_SEED_POD_TELEPORT = 4544;
+    public static final int ROYAL_SEED_POD_TELEPORT_GRAPHIC = 767;
+    public static final int ROYAL_SEED_POD_TELEPORT_ARRIVAL = 4546;
+    public static final int ROYAL_SEED_POD_TELEPORT_ARRIVAL_GRAPHIC = 769;
+    public static final int ROYAL_SEED_POD_TELEPORT_SOUND = -1;
+
     public static final int ANCIENT_TELEPORT = 1979;
     public static final int ANCIENT_TELEPORT_GRAPHIC = 392;
     public static final int ANCIENT_TELEPORT_SOUND = 197;
@@ -43,6 +53,10 @@ public final class AnimationConstants {
     public static final int ARDOUGNE_TELEPORT = 3872;
     public static final int ARDOUGNE_TELEPORT_GRAPHIC = 1237;
     public static final int ARDOUGNE_TELEPORT_SOUND = 200;
+
+    public static final int ARDOUGNE_FARMING_TELEPORT = 3872;
+    public static final int ARDOUGNE_FARMING_TELEPORT_GRAPHIC = 1238;
+    public static final int ARDOUGNE_FARMING_TELEPORT_SOUND = 200;
 
     public static final int DESERT_AMULET_TELEPORT = 9606;
     public static final int DESERT_AMULET_TELEPORT_GRAPHIC = 284;

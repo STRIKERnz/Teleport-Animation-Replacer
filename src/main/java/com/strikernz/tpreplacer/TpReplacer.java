@@ -32,6 +32,8 @@ public class TpReplacer extends Plugin {
     private static final int SCROLL_VISUAL_SUPPRESS_TICKS = 3;
     private static final int LOCAL_TILE_SIZE = 128;
     private static final int ARRIVAL_ANIMATION_RESET_TICKS = 1;
+    private static final int EXPLORERS_RING_GRAPHIC_HEIGHT = 96;
+    private static final int ARDOUGNE_FARMING_GRAPHIC_HEIGHT = 64;
 
     /**
      * Known teleport sound IDs to matching presets, built once for fast sound suppression.
@@ -148,6 +150,14 @@ public class TpReplacer extends Plugin {
             }
         }
 
+        if (animationId == AnimationConstants.ROYAL_SEED_POD_TELEPORT_ARRIVAL) {
+            TeleportAnimation seedPodSelected = getSelectedForAnimation(AnimationConstants.ROYAL_SEED_POD_TELEPORT);
+            if (seedPodSelected != TeleportAnimation.NONE && seedPodSelected != TeleportAnimation.ROYAL_SEED_POD) {
+                player.setAnimation(NO_ID);
+                return;
+            }
+        }
+
         if (!AnimationConstants.isTeleportAnimation(animationId)) {
             return;
         }
@@ -224,6 +234,19 @@ public class TpReplacer extends Plugin {
             if (arrivalSoundId != NO_ID) {
                 playSoundOnce(arrivalSoundId);
             }
+
+            return;
+        }
+
+        if (selected == TeleportAnimation.ROYAL_SEED_POD) {
+            teleporting = true;
+            player.setAnimation(AnimationConstants.ROYAL_SEED_POD_TELEPORT);
+            playSpotAnim(player, AnimationConstants.ROYAL_SEED_POD_TELEPORT_GRAPHIC);
+
+            arrivalAnimationId = AnimationConstants.ROYAL_SEED_POD_TELEPORT_ARRIVAL;
+            arrivalGraphicId = AnimationConstants.ROYAL_SEED_POD_TELEPORT_ARRIVAL_GRAPHIC;
+            arrivalSoundId = NO_ID;
+            arrivalSoundDelay = 0;
 
             return;
         }
@@ -432,8 +455,20 @@ public class TpReplacer extends Plugin {
 
     private void playSpotAnim(Player player, int spotAnimId) {
         if (spotAnimId != NO_ID) {
-            player.createSpotAnim(spotAnimId, spotAnimId, 0, 0);
+            player.createSpotAnim(spotAnimId, spotAnimId, getSpotAnimHeight(spotAnimId), 0);
         }
+    }
+
+    private int getSpotAnimHeight(int spotAnimId) {
+        if (spotAnimId == AnimationConstants.EXPLORERS_RING_TELEPORT_GRAPHIC) {
+            return EXPLORERS_RING_GRAPHIC_HEIGHT;
+        }
+
+        if (spotAnimId == AnimationConstants.ARDOUGNE_FARMING_TELEPORT_GRAPHIC) {
+            return ARDOUGNE_FARMING_GRAPHIC_HEIGHT;
+        }
+
+        return 0;
     }
 
     private void suppressOriginalGraphic(Player player, int originalGraphicId, int replacementGraphicId) {
@@ -507,6 +542,16 @@ public class TpReplacer extends Plugin {
             return TeleportAnimation.XERIC_TALISMAN;
         }
 
+        if (animationId == AnimationConstants.ARDOUGNE_FARMING_TELEPORT
+                && player.hasSpotAnim(AnimationConstants.ARDOUGNE_FARMING_TELEPORT_GRAPHIC)) {
+            return TeleportAnimation.ARDOUGNE_FARMING;
+        }
+
+        if (animationId == AnimationConstants.EXPLORERS_RING_TELEPORT
+                && player.hasSpotAnim(AnimationConstants.EXPLORERS_RING_TELEPORT_GRAPHIC)) {
+            return TeleportAnimation.EXPLORERS_RING;
+        }
+
         return TeleportAnimation.fromAnimationId(animationId);
     }
 
@@ -519,6 +564,15 @@ public class TpReplacer extends Plugin {
         switch (source) {
             case STANDARD:
                 perOverride = config.perOverrideNormal();
+                break;
+            case EXPLORERS_RING:
+                perOverride = config.perOverrideExplorersRing();
+                break;
+            case ARDOUGNE_FARMING:
+                perOverride = config.perOverrideArdougneFarming();
+                break;
+            case ROYAL_SEED_POD:
+                perOverride = config.perOverrideRoyalSeedPod();
                 break;
             case ANCIENT:
                 perOverride = config.perOverrideAncient();
