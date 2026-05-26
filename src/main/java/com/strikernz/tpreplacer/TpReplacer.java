@@ -330,7 +330,7 @@ public class TpReplacer extends Plugin {
             return;
         }
 
-        if (shouldSuppressKnownTeleportSound(soundId)) {
+        if (shouldSuppressKnownTeleportSound(soundId, client.getLocalPlayer())) {
             event.consume();
         }
     }
@@ -353,7 +353,7 @@ public class TpReplacer extends Plugin {
             return;
         }
 
-        if (shouldSuppressKnownTeleportSound(soundId)) {
+        if (shouldSuppressKnownTeleportSound(soundId, client.getLocalPlayer())) {
             event.consume();
         }
 
@@ -442,10 +442,23 @@ public class TpReplacer extends Plugin {
         arrivalAnimationResetTicksRemaining--;
     }
 
-    private boolean shouldSuppressKnownTeleportSound(int soundId) {
+    private boolean shouldSuppressKnownTeleportSound(int soundId, Player player) {
+        if (player == null) {
+            return false;
+        }
+
+        TeleportAnimation activeSource = getSourceForPlayerAnimation(player, player.getAnimation());
+        if (activeSource == null) {
+            return false;
+        }
+
         for (TeleportAnimation ta : TELEPORTS_BY_SOUND.getOrDefault(soundId, Collections.emptySet())) {
-            TeleportAnimation selected = getSelectedForAnimation(ta.getAnimationId());
-            if (selected != TeleportAnimation.NONE && selected != ta) {
+            if (ta != activeSource) {
+                continue;
+            }
+
+            TeleportAnimation selected = getSelectedForSource(activeSource);
+            if (selected != TeleportAnimation.NONE && selected != activeSource) {
                 return true;
             }
         }

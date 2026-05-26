@@ -50,6 +50,9 @@ All notable changes to this project will be documented here
 - Ardougne Farming per-teleport override setting.
 - Royal Seed Pod per-teleport override setting.
 
+### Fixed
+- Prevented shared teleport sound IDs from muting unrelated sounds, such as drinking sounds.
+
 ## [1.0.6] - 2026-05-06
 ### Fixed
 - graphic suppression handling for teleport animations to prevent visual overlap
