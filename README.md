@@ -42,6 +42,15 @@ Open the plugin settings in RuneLite and configure:
 
 All notable changes to this project will be documented here
 
+## [1.0.8] - 2026-06-26
+### Fixed
+- Prevented Ancient teleport overrides from triggering on non-teleport animations that share animation ID unless the Ancient teleport graphic is present.
+- Improved original graphic suppression by also finishing matching graphics objects near the local player.
+
+### Changed
+- Tuned the Desert Amulet replacement graphic height.
+- Cleaned up teleport override selection and two-phase teleport setup code.
+
 ## [1.0.7] - 2026-05-26
 ### Added
 - Random option for the global override and per-teleport overrides.

@@ -96,7 +96,6 @@ public enum TeleportAnimation {
     private final String name;
 
     public static TeleportAnimation fromAnimationId(int animationId) {
-
         return BY_ANIMATION_ID.get(animationId);
     }
 

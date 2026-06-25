@@ -86,8 +86,4 @@ public final class AnimationConstants {
 
     private AnimationConstants() {
     }
-
-    public static boolean isTeleportAnimation(int animationId) {
-        return TeleportAnimation.fromAnimationId(animationId) != null;
-    }
 }
