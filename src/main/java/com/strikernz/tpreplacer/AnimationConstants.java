@@ -58,7 +58,7 @@ public final class AnimationConstants {
     public static final int ARDOUGNE_FARMING_TELEPORT_GRAPHIC = 1238;
     public static final int ARDOUGNE_FARMING_TELEPORT_SOUND = 200;
 
-    public static final int DESERT_AMULET_TELEPORT = 9606;
+    public static final int DESERT_AMULET_TELEPORT = 3872;
     public static final int DESERT_AMULET_TELEPORT_GRAPHIC = 284;
     public static final int DESERT_AMULET_TELEPORT_SOUND = 200;
 

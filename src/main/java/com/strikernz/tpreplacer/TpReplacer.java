@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import java.util.function.Function;
 
 @PluginDescriptor(
         name = "Teleport Animation Replacer",
@@ -48,7 +47,7 @@ public class TpReplacer extends Plugin {
      * Known teleport sound IDs to matching presets, built once for fast sound suppression.
      */
     private static final Map<Integer, Set<TeleportAnimation>> TELEPORTS_BY_SOUND = new HashMap<>();
-    private static final Map<TeleportAnimation, Function<TpreplacerConfig, TeleportAnimation>> PER_TELEPORT_OVERRIDES =
+    private static final Map<TeleportAnimation, PerTeleportOverride> PER_TELEPORT_OVERRIDES =
             new EnumMap<>(TeleportAnimation.class);
 
     static {
@@ -58,27 +57,34 @@ public class TpReplacer extends Plugin {
             }
         }
 
-        PER_TELEPORT_OVERRIDES.put(TeleportAnimation.STANDARD, TpreplacerConfig::perOverrideNormal);
-        PER_TELEPORT_OVERRIDES.put(TeleportAnimation.EXPLORERS_RING, TpreplacerConfig::perOverrideExplorersRing);
-        PER_TELEPORT_OVERRIDES.put(TeleportAnimation.ARDOUGNE_FARMING, TpreplacerConfig::perOverrideArdougneFarming);
-        PER_TELEPORT_OVERRIDES.put(TeleportAnimation.ROYAL_SEED_POD, TpreplacerConfig::perOverrideRoyalSeedPod);
-        PER_TELEPORT_OVERRIDES.put(TeleportAnimation.ANCIENT, TpreplacerConfig::perOverrideAncient);
-        PER_TELEPORT_OVERRIDES.put(TeleportAnimation.ARCEUUS, TpreplacerConfig::perOverrideArceuus);
-        PER_TELEPORT_OVERRIDES.put(TeleportAnimation.XERIC_TALISMAN, TpreplacerConfig::perOverrideXericTalisman);
-        PER_TELEPORT_OVERRIDES.put(TeleportAnimation.LUNAR, TpreplacerConfig::perOverrideLunar);
-        PER_TELEPORT_OVERRIDES.put(TeleportAnimation.TAB, TpreplacerConfig::perOverrideTabs);
-        PER_TELEPORT_OVERRIDES.put(TeleportAnimation.SCROLL, TpreplacerConfig::perOverrideScrolls);
-        PER_TELEPORT_OVERRIDES.put(TeleportAnimation.ECTOPHIAL, TpreplacerConfig::perOverrideEctophial);
-        PER_TELEPORT_OVERRIDES.put(TeleportAnimation.ARDOUGNE, TpreplacerConfig::perOverrideArdougne);
-        PER_TELEPORT_OVERRIDES.put(TeleportAnimation.DESERT_AMULET, TpreplacerConfig::perOverrideDesertAmulet);
-        PER_TELEPORT_OVERRIDES.put(TeleportAnimation.PENDENT_OF_ATES, TpreplacerConfig::perOverridePendentOfAtes);
-        PER_TELEPORT_OVERRIDES.put(TeleportAnimation.RING_OF_SHADOWS_WHITE, TpreplacerConfig::perOverrideRingOfShadows);
-        PER_TELEPORT_OVERRIDES.put(TeleportAnimation.RING_OF_SHADOWS_RED, TpreplacerConfig::perOverrideRingOfShadows);
-        PER_TELEPORT_OVERRIDES.put(TeleportAnimation.RING_OF_SHADOWS_BLACK, TpreplacerConfig::perOverrideRingOfShadows);
-        PER_TELEPORT_OVERRIDES.put(TeleportAnimation.RING_OF_SHADOWS_GRAY, TpreplacerConfig::perOverrideRingOfShadows);
-        PER_TELEPORT_OVERRIDES.put(TeleportAnimation.RING_OF_SHADOWS_ALL, TpreplacerConfig::perOverrideRingOfShadows);
-        PER_TELEPORT_OVERRIDES.put(TeleportAnimation.PHARAOHS_SCEPTRE, TpreplacerConfig::perOverridePharaohsSceptre);
-        PER_TELEPORT_OVERRIDES.put(TeleportAnimation.GIANTSOUL_AMULET, TpreplacerConfig::perOverrideGiantsoulAmulet);
+        PER_TELEPORT_OVERRIDES.put(TeleportAnimation.STANDARD, config -> config.perOverrideNormal());
+        PER_TELEPORT_OVERRIDES.put(TeleportAnimation.EXPLORERS_RING, config -> config.perOverrideExplorersRing());
+        PER_TELEPORT_OVERRIDES.put(TeleportAnimation.ARDOUGNE_FARMING, config -> config.perOverrideArdougneFarming());
+        PER_TELEPORT_OVERRIDES.put(TeleportAnimation.ROYAL_SEED_POD, config -> config.perOverrideRoyalSeedPod());
+        PER_TELEPORT_OVERRIDES.put(TeleportAnimation.ANCIENT, config -> config.perOverrideAncient());
+        PER_TELEPORT_OVERRIDES.put(TeleportAnimation.ARCEUUS, config -> config.perOverrideArceuus());
+        PER_TELEPORT_OVERRIDES.put(TeleportAnimation.XERIC_TALISMAN, config -> config.perOverrideXericTalisman());
+        PER_TELEPORT_OVERRIDES.put(TeleportAnimation.LUNAR, config -> config.perOverrideLunar());
+        PER_TELEPORT_OVERRIDES.put(TeleportAnimation.TAB, config -> config.perOverrideTabs());
+        PER_TELEPORT_OVERRIDES.put(TeleportAnimation.SCROLL, config -> config.perOverrideScrolls());
+        PER_TELEPORT_OVERRIDES.put(TeleportAnimation.ECTOPHIAL, config -> config.perOverrideEctophial());
+        PER_TELEPORT_OVERRIDES.put(TeleportAnimation.ARDOUGNE, config -> config.perOverrideArdougne());
+        PER_TELEPORT_OVERRIDES.put(TeleportAnimation.DESERT_AMULET, config -> config.perOverrideDesertAmulet());
+        PER_TELEPORT_OVERRIDES.put(TeleportAnimation.PENDENT_OF_ATES, config -> config.perOverridePendentOfAtes());
+        putPerOverride(config -> config.perOverrideRingOfShadows(),
+                TeleportAnimation.RING_OF_SHADOWS_WHITE,
+                TeleportAnimation.RING_OF_SHADOWS_RED,
+                TeleportAnimation.RING_OF_SHADOWS_BLACK,
+                TeleportAnimation.RING_OF_SHADOWS_GRAY,
+                TeleportAnimation.RING_OF_SHADOWS_ALL);
+        PER_TELEPORT_OVERRIDES.put(TeleportAnimation.PHARAOHS_SCEPTRE, config -> config.perOverridePharaohsSceptre());
+        PER_TELEPORT_OVERRIDES.put(TeleportAnimation.GIANTSOUL_AMULET, config -> config.perOverrideGiantsoulAmulet());
+    }
+
+    private static void putPerOverride(PerTeleportOverride override, TeleportAnimation... sources) {
+        for (TeleportAnimation source : sources) {
+            PER_TELEPORT_OVERRIDES.put(source, override);
+        }
     }
 
     /**
@@ -223,13 +229,11 @@ public class TpReplacer extends Plugin {
         }
 
         int originalSound = original.getSoundId();
-        int originalGraphic = original.getGraphicId();
-
         if (originalSound != NO_ID) {
             mutedSoundUntilTick.put(originalSound, client.getTickCount() + ORIGINAL_SOUND_MUTE_TICKS);
         }
 
-        suppressOriginalGraphic(player, originalGraphic, selectedGraphicId);
+        suppressOriginalGraphics(player, original, selectedGraphicId);
         suppressSourceAnimationGraphic(player, original, selectedAnimationId);
 
         clearPendingArrival();
@@ -516,13 +520,21 @@ public class TpReplacer extends Plugin {
         return 0;
     }
 
-    private void suppressOriginalGraphic(Player player, int originalGraphicId, int replacementGraphicId) {
-        if (originalGraphicId == NO_ID || originalGraphicId == replacementGraphicId) {
-            return;
+    private void suppressOriginalGraphics(Player player, TeleportAnimation original, int replacementGraphicId) {
+        int suppressUntilTick = client.getTickCount() + ORIGINAL_GRAPHIC_SUPPRESS_TICKS;
+        for (int originalGraphicId : getOriginalGraphicIds(original)) {
+            if (originalGraphicId == NO_ID || originalGraphicId == replacementGraphicId) {
+                continue;
+            }
+
+            suppressedGraphicUntilTick.put(originalGraphicId, suppressUntilTick);
+            removeSpotAnim(player, originalGraphicId);
         }
 
-        suppressedGraphicUntilTick.put(originalGraphicId, client.getTickCount() + ORIGINAL_GRAPHIC_SUPPRESS_TICKS);
-        removeSpotAnim(player, originalGraphicId);
+    }
+
+    private int[] getOriginalGraphicIds(TeleportAnimation original) {
+        return new int[]{original.getGraphicId()};
     }
 
     private void suppressSourceAnimationGraphic(Player player, TeleportAnimation original, int replacementAnimationId) {
@@ -589,6 +601,10 @@ public class TpReplacer extends Plugin {
     }
 
     private TeleportAnimation getSourceForPlayerAnimation(Player player, int animationId) {
+        if (player.hasSpotAnim(AnimationConstants.DESERT_AMULET_TELEPORT_GRAPHIC)) {
+            return TeleportAnimation.DESERT_AMULET;
+        }
+
         if (animationId == AnimationConstants.XERIC_TALISMAN_TELEPORT
                 && player.hasSpotAnim(AnimationConstants.XERIC_TALISMAN_TELEPORT_GRAPHIC)) {
             return TeleportAnimation.XERIC_TALISMAN;
@@ -614,12 +630,14 @@ public class TpReplacer extends Plugin {
     }
 
     private TeleportAnimation getSelectedForSource(TeleportAnimation source) {
-        Function<TpreplacerConfig, TeleportAnimation> overrideGetter = source == null
-                ? null
-                : PER_TELEPORT_OVERRIDES.get(source);
-        TeleportAnimation perOverride = overrideGetter == null ? TeleportAnimation.NONE : overrideGetter.apply(config);
+        TeleportAnimation perOverride = getPerOverrideForSource(source);
         TeleportAnimation selected = (perOverride != TeleportAnimation.NONE) ? perOverride : config.teleportAnimation();
         return resolveRandomSelection(selected, source);
+    }
+
+    private TeleportAnimation getPerOverrideForSource(TeleportAnimation source) {
+        PerTeleportOverride override = source == null ? null : PER_TELEPORT_OVERRIDES.get(source);
+        return override == null ? TeleportAnimation.NONE : override.get(config);
     }
 
     private TeleportAnimation resolveRandomSelection(TeleportAnimation selected, TeleportAnimation source) {
@@ -665,5 +683,9 @@ public class TpReplacer extends Plugin {
             this.graphicId = graphicId;
             this.soundId = soundId;
         }
+    }
+
+    private interface PerTeleportOverride {
+        TeleportAnimation get(TpreplacerConfig config);
     }
 }
