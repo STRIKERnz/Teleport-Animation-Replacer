@@ -195,10 +195,21 @@ public interface TpreplacerConfig extends Config {
     }
 
     @ConfigItem(
+            keyName = "per_overrideMorytaniaLegs",
+            name = "Morytania Legs",
+            description = "Per-teleport animation (None uses global setting)",
+            position = 13,
+            section = perSection
+    )
+    default TeleportAnimation perOverrideMorytaniaLegs() {
+        return TeleportAnimation.NONE;
+    }
+
+    @ConfigItem(
             keyName = "per_overridePendentOfAtes",
             name = "Pendent of Ates",
             description = "Per-teleport animation (None uses global setting)",
-            position = 13,
+            position = 14,
             section = perSection
     )
     default TeleportAnimation perOverridePendentOfAtes() {
@@ -209,7 +220,7 @@ public interface TpreplacerConfig extends Config {
             keyName = "per_overrideRingOfShadows",
             name = "Ring of Shadows",
             description = "Per-teleport animation (None uses global setting)",
-            position = 14,
+            position = 15,
             section = perSection
     )
     default TeleportAnimation perOverrideRingOfShadows() {
@@ -220,7 +231,7 @@ public interface TpreplacerConfig extends Config {
             keyName = "per_overridePharaohsSceptre",
             name = "Pharaoh's Sceptre",
             description = "Per-teleport animation (None uses global setting)",
-            position = 15,
+            position = 16,
             section = perSection
     )
     default TeleportAnimation perOverridePharaohsSceptre() {
@@ -231,7 +242,7 @@ public interface TpreplacerConfig extends Config {
             keyName = "per_overrideGiantsoulAmulet",
             name = "Giantsoul Amulet",
             description = "Per-teleport animation (None uses global setting)",
-            position = 16,
+            position = 17,
             section = perSection
     )
     default TeleportAnimation perOverrideGiantsoulAmulet() {

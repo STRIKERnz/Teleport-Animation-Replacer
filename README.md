@@ -18,6 +18,7 @@ A RuneLite plugin that replaces teleport animations with an alternative animatio
   - Ectophial teleport
   - Ardougne Cape teleport
   - Desert Amulet teleport
+  - Morytania Legs teleport
   - Giantsoul Amulet teleport
   - Pharaoh's Sceptre teleport
   - Ring of Shadows colour variants
@@ -42,9 +43,13 @@ Open the plugin settings in RuneLite and configure:
 
 All notable changes to this project will be documented here
 
+
 ## [1.0.9] - 2026-07-03
 ### Fixed
 - Corrected the Desert Amulet teleport animation ID and detection so its original graphic is suppressed when overridden.
+
+### Added
+- Morytania Legs teleport preset and per-teleport override support.
 
 ## [1.0.8] - 2026-06-26
 ### Fixed

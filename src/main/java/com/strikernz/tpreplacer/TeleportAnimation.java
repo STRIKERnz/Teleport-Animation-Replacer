@@ -48,6 +48,8 @@ public enum TeleportAnimation {
             AnimationConstants.ARDOUGNE_TELEPORT_SOUND, "Ardougne Cape"),
     DESERT_AMULET(AnimationConstants.DESERT_AMULET_TELEPORT, AnimationConstants.DESERT_AMULET_TELEPORT_GRAPHIC,
             AnimationConstants.DESERT_AMULET_TELEPORT_SOUND, "Desert Amulet"),
+    MORYTANIA_LEGS(AnimationConstants.MORYTANIA_LEGS_TELEPORT, AnimationConstants.MORYTANIA_LEGS_TELEPORT_GRAPHIC,
+            AnimationConstants.MORYTANIA_LEGS_TELEPORT_SOUND, "Morytania Legs"),
     GIANTSOUL_AMULET(AnimationConstants.GIANTSOUL_AMULET_TELEPORT,
             AnimationConstants.GIANTSOUL_AMULET_TELEPORT_GRAPHIC,
             AnimationConstants.GIANTSOUL_AMULET_TELEPORT_SOUND, "Giantsoul Amulet"),

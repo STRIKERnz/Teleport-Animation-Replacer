@@ -84,6 +84,10 @@ public final class AnimationConstants {
     public static final int PENDENT_OF_ATES_TELEPORT_ARRIVAL = 10956;
     public static final int PENDENT_OF_ATES_TELEPORT_SOUND = 1490;
 
+    public static final int MORYTANIA_LEGS_TELEPORT = 3874;
+    public static final int MORYTANIA_LEGS_TELEPORT_GRAPHIC = 1236;
+    public static final int MORYTANIA_LEGS_TELEPORT_SOUND = 200;
+
     private AnimationConstants() {
     }
 }

@@ -42,6 +42,7 @@ public class TpReplacer extends Plugin {
     private static final int EXPLORERS_RING_GRAPHIC_HEIGHT = 96;
     private static final int ARDOUGNE_FARMING_GRAPHIC_HEIGHT = 64;
     private static final int DESERT_AMULET_GRAPHIC_HEIGHT = 80;
+    private static final int MORYTANIA_LEGS_GRAPHIC_HEIGHT = 96;
 
     /**
      * Known teleport sound IDs to matching presets, built once for fast sound suppression.
@@ -70,6 +71,7 @@ public class TpReplacer extends Plugin {
         PER_TELEPORT_OVERRIDES.put(TeleportAnimation.ECTOPHIAL, config -> config.perOverrideEctophial());
         PER_TELEPORT_OVERRIDES.put(TeleportAnimation.ARDOUGNE, config -> config.perOverrideArdougne());
         PER_TELEPORT_OVERRIDES.put(TeleportAnimation.DESERT_AMULET, config -> config.perOverrideDesertAmulet());
+        PER_TELEPORT_OVERRIDES.put(TeleportAnimation.MORYTANIA_LEGS, config -> config.perOverrideMorytaniaLegs());
         PER_TELEPORT_OVERRIDES.put(TeleportAnimation.PENDENT_OF_ATES, config -> config.perOverridePendentOfAtes());
         putPerOverride(config -> config.perOverrideRingOfShadows(),
                 TeleportAnimation.RING_OF_SHADOWS_WHITE,
@@ -123,6 +125,8 @@ public class TpReplacer extends Plugin {
     private int arrivalSoundId = NO_ID;
     private int arrivalSoundDelay = ARRIVAL_SOUND_DELAY_TICKS;
     private int scrollVisualSuppressUntilTick = NO_ID;
+    private int ignoredReplacementAnimationId = NO_ID;
+    private int ignoredReplacementAnimationTick = NO_ID;
 
     private static CustomTeleportIds parseCustomIds(String ids) {
         if (ids == null || ids.trim().isEmpty()) {
@@ -167,6 +171,10 @@ public class TpReplacer extends Plugin {
         }
 
         int animationId = player.getAnimation();
+
+        if (shouldIgnoreReplacementAnimation(animationId)) {
+            return;
+        }
 
         if (shouldSuppressScrollVisual() && animationId == AnimationConstants.TELEPORT_SCROLLS) {
             clearScrollAnimation(player);
@@ -284,31 +292,12 @@ public class TpReplacer extends Plugin {
 
         // Handle custom override (uses numeric IDs from single comma-separated config field)
         if (selected == TeleportAnimation.CUSTOM) {
-            if (customIds.animationId != NO_ID) {
-                player.setAnimation(customIds.animationId);
-            }
-
-            if (customIds.graphicId != NO_ID) {
-                playSpotAnim(player, customIds.graphicId);
-            }
-
-            if (customIds.soundId != NO_ID) {
-                playSoundOnce(customIds.soundId);
-            }
-
+            applyDirectReplacement(player, customIds.animationId, customIds.graphicId, customIds.soundId);
             return;
         }
 
         // Generic override path for enum-based presets
-        player.setAnimation(selected.getAnimationId());
-
-        if (selected.getGraphicId() != NO_ID) {
-            playSpotAnim(player, selected.getGraphicId());
-        }
-
-        if (selected.getSoundId() != NO_ID) {
-            playSoundOnce(selected.getSoundId());
-        }
+        applyDirectReplacement(player, selected.getAnimationId(), selected.getGraphicId(), selected.getSoundId());
     }
 
     @Subscribe
@@ -325,6 +314,7 @@ public class TpReplacer extends Plugin {
         if (scrollVisualSuppressUntilTick < tick) {
             scrollVisualSuppressUntilTick = NO_ID;
         }
+        expireIgnoredReplacementAnimation(tick);
         if (shouldSuppressScrollVisual() && player.getAnimation() == AnimationConstants.TELEPORT_SCROLLS) {
             clearScrollAnimation(player);
         }
@@ -349,14 +339,12 @@ public class TpReplacer extends Plugin {
         int tick = client.getTickCount();
 
         // Don't suppress a sound the plugin itself just triggered
-        if (soundId == lastPlayedSoundId && tick == lastPlayedSoundTick) {
+        if (isPluginPlayedSound(soundId, tick)) {
             return;
         }
 
-        boolean isLocalPlayer = event.getSource() == client.getLocalPlayer();
-
         // Mute map only applies to sounds sourced to the local player
-        if (isLocalPlayer && mutedSoundUntilTick.getOrDefault(soundId, NO_ID) >= tick) {
+        if (event.getSource() == client.getLocalPlayer() && shouldMuteSound(soundId, tick)) {
             event.consume();
             return;
         }
@@ -372,13 +360,13 @@ public class TpReplacer extends Plugin {
         int tick = client.getTickCount();
 
         // Don't suppress a sound the plugin itself just triggered
-        if (soundId == lastPlayedSoundId && tick == lastPlayedSoundTick) {
+        if (isPluginPlayedSound(soundId, tick)) {
             return;
         }
 
         // First, honor explicit mutes we added when replacing teleports. This avoids races where
         // area sounds arrive before other logic and ensures replaced teleport sounds are consumed.
-        if (mutedSoundUntilTick.getOrDefault(soundId, NO_ID) >= tick) {
+        if (shouldMuteSound(soundId, tick)) {
             event.consume();
             return;
         }
@@ -425,6 +413,7 @@ public class TpReplacer extends Plugin {
         mutedSoundUntilTick.clear();
         suppressedGraphicUntilTick.clear();
         scrollVisualSuppressUntilTick = NO_ID;
+        clearIgnoredReplacementAnimation();
     }
 
     private void clearPendingArrival() {
@@ -438,15 +427,13 @@ public class TpReplacer extends Plugin {
     }
 
     private void applyArrivalEffects(Player player) {
-        if (arrivalAnimationId != NO_ID) {
-            player.setAnimation(arrivalAnimationId);
-            activeArrivalAnimationId = arrivalAnimationId;
-            arrivalAnimationResetTicksRemaining = ARRIVAL_ANIMATION_RESET_TICKS;
-        }
+        playReplacementAnimation(player, arrivalAnimationId);
+        activeArrivalAnimationId = arrivalAnimationId;
+        arrivalAnimationResetTicksRemaining = arrivalAnimationId == NO_ID
+                ? NO_ID
+                : ARRIVAL_ANIMATION_RESET_TICKS;
 
-        if (arrivalGraphicId != NO_ID) {
-            playSpotAnim(player, arrivalGraphicId);
-        }
+        playSpotAnim(player, arrivalGraphicId);
 
         arrivalSoundTicksRemaining = arrivalSoundId == NO_ID ? NO_ID : arrivalSoundDelay;
     }
@@ -455,7 +442,7 @@ public class TpReplacer extends Plugin {
                                        int landingAnimationId, int landingGraphicId,
                                        int landingSoundId, int landingSoundDelay) {
         teleporting = true;
-        player.setAnimation(castAnimationId);
+        playReplacementAnimation(player, castAnimationId);
         playSpotAnim(player, castGraphicId);
 
         arrivalAnimationId = landingAnimationId;
@@ -482,6 +469,50 @@ public class TpReplacer extends Plugin {
         arrivalAnimationResetTicksRemaining--;
     }
 
+    private void applyDirectReplacement(Player player, int animationId, int graphicId, int soundId) {
+        playReplacementAnimation(player, animationId);
+        playSpotAnim(player, graphicId);
+        playSoundOnce(soundId);
+    }
+
+    private void playReplacementAnimation(Player player, int animationId) {
+        if (animationId == NO_ID) {
+            return;
+        }
+
+        ignoreNextReplacementAnimation(animationId);
+        player.setAnimation(animationId);
+    }
+
+    private void ignoreNextReplacementAnimation(int animationId) {
+        if (animationId == NO_ID) {
+            return;
+        }
+
+        ignoredReplacementAnimationId = animationId;
+        ignoredReplacementAnimationTick = client.getTickCount();
+    }
+
+    private boolean shouldIgnoreReplacementAnimation(int animationId) {
+        if (animationId == NO_ID || animationId != ignoredReplacementAnimationId) {
+            return false;
+        }
+
+        clearIgnoredReplacementAnimation();
+        return true;
+    }
+
+    private void expireIgnoredReplacementAnimation(int tick) {
+        if (ignoredReplacementAnimationTick != NO_ID && ignoredReplacementAnimationTick < tick - 1) {
+            clearIgnoredReplacementAnimation();
+        }
+    }
+
+    private void clearIgnoredReplacementAnimation() {
+        ignoredReplacementAnimationId = NO_ID;
+        ignoredReplacementAnimationTick = NO_ID;
+    }
+
     private boolean shouldSuppressKnownTeleportSound(int soundId, Player player) {
         if (player == null) {
             return false;
@@ -496,6 +527,14 @@ public class TpReplacer extends Plugin {
         return sourcesWithSound != null
                 && sourcesWithSound.contains(activeSource)
                 && isOverridden(activeSource);
+    }
+
+    private boolean isPluginPlayedSound(int soundId, int tick) {
+        return soundId == lastPlayedSoundId && tick == lastPlayedSoundTick;
+    }
+
+    private boolean shouldMuteSound(int soundId, int tick) {
+        return mutedSoundUntilTick.getOrDefault(soundId, NO_ID) >= tick;
     }
 
     private void playSpotAnim(Player player, int spotAnimId) {
@@ -517,24 +556,21 @@ public class TpReplacer extends Plugin {
             return DESERT_AMULET_GRAPHIC_HEIGHT;
         }
 
+        if (spotAnimId == AnimationConstants.MORYTANIA_LEGS_TELEPORT_GRAPHIC) {
+            return MORYTANIA_LEGS_GRAPHIC_HEIGHT;
+        }
+
         return 0;
     }
 
     private void suppressOriginalGraphics(Player player, TeleportAnimation original, int replacementGraphicId) {
-        int suppressUntilTick = client.getTickCount() + ORIGINAL_GRAPHIC_SUPPRESS_TICKS;
-        for (int originalGraphicId : getOriginalGraphicIds(original)) {
-            if (originalGraphicId == NO_ID || originalGraphicId == replacementGraphicId) {
-                continue;
-            }
-
-            suppressedGraphicUntilTick.put(originalGraphicId, suppressUntilTick);
-            removeSpotAnim(player, originalGraphicId);
+        int originalGraphicId = original.getGraphicId();
+        if (originalGraphicId == NO_ID || originalGraphicId == replacementGraphicId) {
+            return;
         }
 
-    }
-
-    private int[] getOriginalGraphicIds(TeleportAnimation original) {
-        return new int[]{original.getGraphicId()};
+        suppressedGraphicUntilTick.put(originalGraphicId, client.getTickCount() + ORIGINAL_GRAPHIC_SUPPRESS_TICKS);
+        removeSpotAnim(player, originalGraphicId);
     }
 
     private void suppressSourceAnimationGraphic(Player player, TeleportAnimation original, int replacementAnimationId) {
