@@ -88,6 +88,11 @@ public final class AnimationConstants {
     public static final int MORYTANIA_LEGS_TELEPORT_GRAPHIC = 1236;
     public static final int MORYTANIA_LEGS_TELEPORT_SOUND = 200;
 
+    // Second half of the quetzal whistle teleport (player pose, then the bird)
+    public static final int QUETZAL_TELEPORT = 10944;
+    public static final int QUETZAL_TELEPORT_GRAPHIC = 2735;
+    public static final int QUETZAL_TELEPORT_SOUND = -1;
+
     private AnimationConstants() {
     }
 }

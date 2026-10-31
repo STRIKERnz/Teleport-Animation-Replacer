@@ -6,11 +6,14 @@ import net.runelite.api.Client;
 import net.runelite.api.Player;
 import net.runelite.api.events.AnimationChanged;
 import net.runelite.api.events.AreaSoundEffectPlayed;
+import net.runelite.api.events.ClientTick;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.GraphicChanged;
 import net.runelite.api.events.GraphicsObjectCreated;
 import net.runelite.api.events.SoundEffectPlayed;
 import net.runelite.api.coords.LocalPoint;
+import net.runelite.api.coords.WorldPoint;
+import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
@@ -44,6 +47,12 @@ public class TpReplacer extends Plugin {
     private static final int ARDOUGNE_FARMING_GRAPHIC_HEIGHT = 64;
     private static final int DESERT_AMULET_GRAPHIC_HEIGHT = 80;
     private static final int MORYTANIA_LEGS_GRAPHIC_HEIGHT = 96;
+    // Quetzal timing (client ticks / frames) was tuned in-game against the standard spellbook teleport.
+    private static final int QUETZAL_ANIMATION_START_FRAME = 25;
+    private static final int QUETZAL_GRAPHIC_START_FRAME = 1;
+    private static final int QUETZAL_GRAPHIC_DELAY_CLIENT_TICKS = 38;
+    private static final int QUETZAL_MAX_CLIENT_TICKS = 120;
+    private static final int QUETZAL_SPOT_ANIM_KEY = 0x52A71;
 
     /**
      * Known teleport sound IDs to matching presets, built once for fast sound suppression.
@@ -100,6 +109,8 @@ public class TpReplacer extends Plugin {
     @Inject
     private Client client;
     @Inject
+    private ClientThread clientThread;
+    @Inject
     private TpreplacerConfig config;
     /**
      * Whether the local player is currently in a two-phase teleport (waiting for landing).
@@ -127,6 +138,14 @@ public class TpReplacer extends Plugin {
     private int arrivalSoundId = NO_ID;
     private int arrivalSoundDelay = ARRIVAL_SOUND_DELAY_TICKS;
     private int scrollVisualSuppressUntilTick = NO_ID;
+    /**
+     * Quetzal replacement state: client ticks since start ({@code 0} = inactive), the source animation
+     * the server keeps re-sending, and the tile it started on.
+     */
+    private int quetzalClientTicks;
+    private int quetzalSourceAnimationId = NO_ID;
+    private WorldPoint quetzalOrigin;
+    private boolean quetzalGraphicStarted;
 
     private static CustomTeleportIds parseCustomIds(String ids) {
         if (ids == null || ids.trim().isEmpty()) {
@@ -160,6 +179,7 @@ public class TpReplacer extends Plugin {
 
     @Override
     protected void shutDown() {
+        clientThread.invoke(() -> stopQuetzal(client.getLocalPlayer()));
         resetState();
     }
 
@@ -171,6 +191,11 @@ public class TpReplacer extends Plugin {
         }
 
         int animationId = player.getAnimation();
+
+        if (quetzalClientTicks > 0 && animationId == quetzalSourceAnimationId) {
+            applyQuetzalAnimation(player);
+            return;
+        }
 
         if (shouldIgnoreAnimation(animationId)) {
             return;
@@ -246,6 +271,12 @@ public class TpReplacer extends Plugin {
         suppressSourceAnimationGraphic(player, original, selectedAnimationId);
 
         clearPendingArrival();
+        stopQuetzal(player);
+
+        if (selected == TeleportAnimation.QUETZAL) {
+            startQuetzal(player, animationId);
+            return;
+        }
 
         // Cowbell has a special two-phase animation (cast + landing)
         if (selected == TeleportAnimation.COWBELL) {
@@ -331,6 +362,28 @@ public class TpReplacer extends Plugin {
             arrivalSoundTicksRemaining = NO_ID;
         } else {
             arrivalSoundTicksRemaining--;
+        }
+    }
+
+    @Subscribe
+    public void onClientTick(ClientTick event) {
+        if (quetzalClientTicks == 0) {
+            return;
+        }
+
+        Player player = client.getLocalPlayer();
+        if (player == null || !player.getWorldLocation().equals(quetzalOrigin)
+                || ++quetzalClientTicks > QUETZAL_MAX_CLIENT_TICKS) {
+            stopQuetzal(player);
+            return;
+        }
+
+        if (player.getAnimation() == quetzalSourceAnimationId) {
+            applyQuetzalAnimation(player);
+        }
+
+        if (!quetzalGraphicStarted && quetzalClientTicks >= QUETZAL_GRAPHIC_DELAY_CLIENT_TICKS) {
+            startQuetzalGraphic(player);
         }
     }
 
@@ -468,6 +521,44 @@ public class TpReplacer extends Plugin {
         }
 
         arrivalAnimationResetTicksRemaining--;
+    }
+
+    private void startQuetzal(Player player, int sourceAnimationId) {
+        quetzalClientTicks = 1;
+        quetzalSourceAnimationId = sourceAnimationId;
+        quetzalOrigin = player.getWorldLocation();
+        quetzalGraphicStarted = false;
+        applyQuetzalAnimation(player);
+    }
+
+    private void applyQuetzalAnimation(Player player) {
+        ignoreAnimation(AnimationConstants.QUETZAL_TELEPORT);
+        player.setAnimation(AnimationConstants.QUETZAL_TELEPORT);
+        player.setAnimationFrame(QUETZAL_ANIMATION_START_FRAME);
+    }
+
+    private void startQuetzalGraphic(Player player) {
+        // Started once: re-applying the player animation must not restart the bird's timeline.
+        quetzalGraphicStarted = true;
+        player.createSpotAnim(QUETZAL_SPOT_ANIM_KEY, AnimationConstants.QUETZAL_TELEPORT_GRAPHIC, 0, 0);
+        for (ActorSpotAnim spotAnim : player.getSpotAnims()) {
+            if (spotAnim.getHash() == QUETZAL_SPOT_ANIM_KEY) {
+                spotAnim.setFrame(QUETZAL_GRAPHIC_START_FRAME);
+                spotAnim.setCycle(0);
+                break;
+            }
+        }
+    }
+
+    private void stopQuetzal(Player player) {
+        if (player != null && quetzalGraphicStarted) {
+            player.removeSpotAnim(QUETZAL_SPOT_ANIM_KEY);
+        }
+
+        quetzalClientTicks = 0;
+        quetzalSourceAnimationId = NO_ID;
+        quetzalOrigin = null;
+        quetzalGraphicStarted = false;
     }
 
     private void applyDirectReplacement(Player player, int animationId, int graphicId, int soundId) {

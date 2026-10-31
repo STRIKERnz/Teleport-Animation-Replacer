@@ -73,13 +73,16 @@ public enum TeleportAnimation {
             AnimationConstants.RING_OF_SHADOWS_TELEPORT_SOUND, "Ring of Shadows (Grey)"),
     RING_OF_SHADOWS_ALL(AnimationConstants.RING_OF_SHADOWS_TELEPORT,
             AnimationConstants.RING_OF_SHADOWS_ALL_GRAPHIC,
-            AnimationConstants.RING_OF_SHADOWS_TELEPORT_SOUND, "Ring of Shadows (All)");
+            AnimationConstants.RING_OF_SHADOWS_TELEPORT_SOUND, "Ring of Shadows (All)"),
+    QUETZAL(AnimationConstants.QUETZAL_TELEPORT, AnimationConstants.QUETZAL_TELEPORT_GRAPHIC,
+            AnimationConstants.QUETZAL_TELEPORT_SOUND, "Quetzal");
 
     private static final Map<Integer, TeleportAnimation> BY_ANIMATION_ID = new HashMap<>();
 
     static {
         for (TeleportAnimation ta : values()) {
-            if (ta.animationId > 0) {
+            // Quetzal is replacement-only: the real whistle teleport must not be detected as a source
+            if (ta.animationId > 0 && ta != QUETZAL) {
                 BY_ANIMATION_ID.put(ta.animationId, ta);
             }
         }
