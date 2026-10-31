@@ -25,7 +25,7 @@ A RuneLite plugin that replaces teleport animations with an alternative animatio
   - Ring of Shadows colour variants
   - Pendent of Ates teleport
   - Volcanic Mine teleport tablet
-  - Ghommal's hilt teleports (all tiers, including Avernic)
+  - Ghommal's hilt teleports (all tiers, including Avernic and the red Mor Ul Rek versions)
 
 ## Default behavior
 By default, the plugin replaces all teleports with the Cowbell Amulet animation.

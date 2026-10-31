@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.function.IntPredicate;
 
 /**
  * Teleport animation presets that can be selected in the plugin configuration.
@@ -109,6 +110,23 @@ public enum TeleportAnimation {
             AnimationConstants.GHOMMALS_HILT_TELEPORT_SOUND, "Ghommal's Hilt 6 Avernic",
             AnimationConstants.GHOMMALS_HILT_6_AVERNIC_TELEPORT_ARRIVAL, AnimationConstants.GHOMMALS_HILT_6_AVERNIC_TELEPORT_ARRIVAL_GRAPHIC,
             AnimationConstants.GHOMMALS_HILT_6_AVERNIC_TELEPORT_RED_GRAPHIC, AnimationConstants.GHOMMALS_HILT_6_AVERNIC_TELEPORT_RED_ARRIVAL_GRAPHIC),
+    // Red hilt teleports (Mor Ul Rek) share the normal tier's animations; detected by graphic
+    GHOMMALS_HILT_5_RED(AnimationConstants.GHOMMALS_HILT_5_TELEPORT, AnimationConstants.GHOMMALS_HILT_5_TELEPORT_FEMALE, AnimationConstants.GHOMMALS_HILT_5_TELEPORT_RED_GRAPHIC,
+            AnimationConstants.GHOMMALS_HILT_TELEPORT_SOUND, "Ghommal's Hilt 5 (Red)",
+            AnimationConstants.GHOMMALS_HILT_5_TELEPORT_ARRIVAL, AnimationConstants.GHOMMALS_HILT_5_TELEPORT_RED_ARRIVAL_GRAPHIC,
+            AnimationConstants.GHOMMALS_HILT_5_TELEPORT_GRAPHIC, AnimationConstants.GHOMMALS_HILT_5_TELEPORT_ARRIVAL_GRAPHIC),
+    GHOMMALS_HILT_6_RED(AnimationConstants.GHOMMALS_HILT_6_TELEPORT, AnimationConstants.GHOMMALS_HILT_6_TELEPORT_FEMALE, AnimationConstants.GHOMMALS_HILT_6_TELEPORT_RED_GRAPHIC,
+            AnimationConstants.GHOMMALS_HILT_TELEPORT_SOUND, "Ghommal's Hilt 6 (Red)",
+            AnimationConstants.GHOMMALS_HILT_6_TELEPORT_ARRIVAL, AnimationConstants.GHOMMALS_HILT_6_TELEPORT_RED_ARRIVAL_GRAPHIC,
+            AnimationConstants.GHOMMALS_HILT_6_TELEPORT_GRAPHIC, AnimationConstants.GHOMMALS_HILT_6_TELEPORT_ARRIVAL_GRAPHIC),
+    GHOMMALS_HILT_5_AVERNIC_RED(AnimationConstants.GHOMMALS_HILT_5_AVERNIC_TELEPORT, AnimationConstants.GHOMMALS_HILT_5_AVERNIC_TELEPORT_FEMALE, AnimationConstants.GHOMMALS_HILT_5_AVERNIC_TELEPORT_RED_GRAPHIC,
+            AnimationConstants.GHOMMALS_HILT_TELEPORT_SOUND, "Ghommal's Hilt 5 Avernic (Red)",
+            AnimationConstants.GHOMMALS_HILT_5_AVERNIC_TELEPORT_ARRIVAL, AnimationConstants.GHOMMALS_HILT_5_AVERNIC_TELEPORT_RED_ARRIVAL_GRAPHIC,
+            AnimationConstants.GHOMMALS_HILT_5_AVERNIC_TELEPORT_GRAPHIC, AnimationConstants.GHOMMALS_HILT_5_AVERNIC_TELEPORT_ARRIVAL_GRAPHIC),
+    GHOMMALS_HILT_6_AVERNIC_RED(AnimationConstants.GHOMMALS_HILT_6_AVERNIC_TELEPORT, AnimationConstants.GHOMMALS_HILT_6_AVERNIC_TELEPORT_FEMALE, AnimationConstants.GHOMMALS_HILT_6_AVERNIC_TELEPORT_RED_GRAPHIC,
+            AnimationConstants.GHOMMALS_HILT_TELEPORT_SOUND, "Ghommal's Hilt 6 Avernic (Red)",
+            AnimationConstants.GHOMMALS_HILT_6_AVERNIC_TELEPORT_ARRIVAL, AnimationConstants.GHOMMALS_HILT_6_AVERNIC_TELEPORT_RED_ARRIVAL_GRAPHIC,
+            AnimationConstants.GHOMMALS_HILT_6_AVERNIC_TELEPORT_GRAPHIC, AnimationConstants.GHOMMALS_HILT_6_AVERNIC_TELEPORT_ARRIVAL_GRAPHIC),
     QUETZAL(AnimationConstants.QUETZAL_TELEPORT, AnimationConstants.QUETZAL_TELEPORT_GRAPHIC,
             AnimationConstants.QUETZAL_TELEPORT_SOUND, "Quetzal");
 
@@ -119,13 +137,13 @@ public enum TeleportAnimation {
         for (TeleportAnimation ta : values()) {
             // Quetzal is replacement-only: the real whistle teleport must not be detected as a source
             if (ta.animationId > 0 && ta != QUETZAL) {
-                BY_ANIMATION_ID.put(ta.animationId, ta);
+                BY_ANIMATION_ID.putIfAbsent(ta.animationId, ta);
             }
             if (ta.femaleAnimationId > 0) {
-                BY_ANIMATION_ID.put(ta.femaleAnimationId, ta);
+                BY_ANIMATION_ID.putIfAbsent(ta.femaleAnimationId, ta);
             }
             if (ta.arrivalAnimationId > 0) {
-                BY_ARRIVAL_ANIMATION_ID.put(ta.arrivalAnimationId, ta);
+                BY_ARRIVAL_ANIMATION_ID.putIfAbsent(ta.arrivalAnimationId, ta);
             }
         }
 
@@ -178,6 +196,25 @@ public enum TeleportAnimation {
 
     public static TeleportAnimation fromAnimationId(int animationId) {
         return BY_ANIMATION_ID.get(animationId);
+    }
+
+    /**
+     * Like {@link #fromAnimationId}, but prefers a preset sharing that animation whose graphic is showing.
+     */
+    public static TeleportAnimation fromAnimationId(int animationId, IntPredicate hasGraphic) {
+        TeleportAnimation primary = BY_ANIMATION_ID.get(animationId);
+        if (primary == null) {
+            return null;
+        }
+
+        for (TeleportAnimation ta : values()) {
+            if (ta != primary && (ta.animationId == animationId || ta.femaleAnimationId == animationId)
+                    && ta.graphicId > 0 && hasGraphic.test(ta.graphicId)) {
+                return ta;
+            }
+        }
+
+        return primary;
     }
 
     public int getAnimationId(boolean female) {

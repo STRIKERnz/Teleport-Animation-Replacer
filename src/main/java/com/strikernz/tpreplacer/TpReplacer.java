@@ -103,7 +103,11 @@ public class TpReplacer extends Plugin {
                 TeleportAnimation.GHOMMALS_HILT_5,
                 TeleportAnimation.GHOMMALS_HILT_6,
                 TeleportAnimation.GHOMMALS_HILT_5_AVERNIC,
-                TeleportAnimation.GHOMMALS_HILT_6_AVERNIC);
+                TeleportAnimation.GHOMMALS_HILT_6_AVERNIC,
+                TeleportAnimation.GHOMMALS_HILT_5_RED,
+                TeleportAnimation.GHOMMALS_HILT_6_RED,
+                TeleportAnimation.GHOMMALS_HILT_5_AVERNIC_RED,
+                TeleportAnimation.GHOMMALS_HILT_6_AVERNIC_RED);
     }
 
     private static void putPerOverride(PerTeleportOverride override, TeleportAnimation... sources) {
@@ -770,7 +774,7 @@ public class TpReplacer extends Plugin {
                     : null;
         }
 
-        return TeleportAnimation.fromAnimationId(animationId);
+        return TeleportAnimation.fromAnimationId(animationId, player::hasSpotAnim);
     }
 
     private TeleportAnimation getSelectedForSource(TeleportAnimation source) {
