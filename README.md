@@ -3,7 +3,7 @@ A RuneLite plugin that replaces teleport animations with an alternative animatio
 
 ## Features
 - Replace teleport animations with a selected preset animation (default: Cowbell Amulet).
-- **Quetzal** preset: the second half of the quetzal whistle teleport, including the bird. Timing is tuned for standard spellbook teleports; other teleports may cut it short. Adapted from [Rapid Animation](https://github.com/RapidUrsa/RapidAnimation) by RapidUrsa (BSD 2-Clause).
+- **Quetzal** preset: the second half of the quetzal whistle teleport, including the bird. Adapted from [Rapid Animation](https://github.com/RapidUrsa/RapidAnimation) by RapidUrsa (BSD 2-Clause).
 - Choose **Random** globally or per teleport type to pick a replacement preset at random each time.
 - Per-teleport-type overrides so you can choose exactly which animation each teleport uses:
   - Normal spellbook teleports and jewellery teleports (rings/amulets)
@@ -45,7 +45,7 @@ Open the plugin settings in RuneLite and configure:
 All notable changes to this project will be documented here
 
 
-## [Unreleased]
+## [1.1.0] - 2026-11-01
 ### Added
 - Quetzal replacement preset (player animation and bird).
 
