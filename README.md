@@ -3,6 +3,7 @@ A RuneLite plugin that replaces teleport animations with an alternative animatio
 
 ## Features
 - Replace teleport animations with a selected preset animation (default: Cowbell Amulet).
+- **Quetzal** preset: the second half of the quetzal whistle teleport, including the bird. Adapted from [Rapid Animation](https://github.com/RapidUrsa/RapidAnimation) by RapidUrsa (BSD 2-Clause).
 - Choose **Random** globally or per teleport type to pick a replacement preset at random each time.
 - Per-teleport-type overrides so you can choose exactly which animation each teleport uses:
   - Normal spellbook teleports and jewellery teleports (rings/amulets)
@@ -23,6 +24,8 @@ A RuneLite plugin that replaces teleport animations with an alternative animatio
   - Pharaoh's Sceptre teleport
   - Ring of Shadows colour variants
   - Pendent of Ates teleport
+  - Volcanic Mine teleport tablet
+  - Ghommal's hilt teleports (all tiers, including Avernic and the red Mor Ul Rek versions)
 
 ## Default behavior
 By default, the plugin replaces all teleports with the Cowbell Amulet animation.
@@ -31,11 +34,12 @@ By default, the plugin replaces all teleports with the Cowbell Amulet animation.
 Open the plugin settings in RuneLite and configure:
 - **Override All** — the global animation applied to all teleports.
 - **Per Teleport** section — set a specific animation per teleport type; "None (Use Global)" falls back to the global setting
-- **Random** — available in both global and per-teleport selectors; picks from the built-in presets and skips None, Custom, and Random itself.
+- **Random** — available in both global and per-teleport selectors; picks from the built-in presets and skips None, Custom, and Random itself. Of the Ghommal's hilt presets, only tiers 5 and 6 (normal and red) are picked.
 - **Custom Options** — Advanced users can specify custom animation, graphic and sound IDs for each teleport type, allowing for anything, to be used as a replacement.
 
 ## Notes
 - This plugin is cosmetic only — it does not change teleport mechanics.
+- Ghommal's hilt teleports (the real ones and the presets) render incorrectly while RuneLite's **Animation Smoothing** plugin is on. Turn it off to see them properly.
 
 ## Version history
 
@@ -43,6 +47,11 @@ Open the plugin settings in RuneLite and configure:
 
 All notable changes to this project will be documented here
 
+
+## [1.1.0] - 2026-11-01
+### Added
+- Quetzal replacement preset (player animation and bird).
+- Volcanic Mine tab and Ghommal's hilt teleport presets and per-teleport override support.
 
 ## [1.0.9] - 2026-07-03
 ### Fixed

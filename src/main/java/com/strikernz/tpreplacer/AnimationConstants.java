@@ -88,6 +88,76 @@ public final class AnimationConstants {
     public static final int MORYTANIA_LEGS_TELEPORT_GRAPHIC = 1236;
     public static final int MORYTANIA_LEGS_TELEPORT_SOUND = 200;
 
+    public static final int VOLCANIC_MINE_TELEPORT = 7741;
+    public static final int VOLCANIC_MINE_TELEPORT_ARRIVAL = 7747;
+    public static final int VOLCANIC_MINE_TELEPORT_GRAPHIC = 1409;
+    public static final int VOLCANIC_MINE_TELEPORT_SOUND = -1;
+
+    // Ghommal's hilt (Combat Achievements) teleports: the cast animation differs by body type; the red graphics
+    // are an alternate colour of each tier
+    public static final int GHOMMALS_HILT_1_TELEPORT = 9116;
+    public static final int GHOMMALS_HILT_1_TELEPORT_FEMALE = 9117;
+    public static final int GHOMMALS_HILT_1_TELEPORT_ARRIVAL = 9118;
+    public static final int GHOMMALS_HILT_1_TELEPORT_GRAPHIC = 1940;
+    public static final int GHOMMALS_HILT_1_TELEPORT_ARRIVAL_GRAPHIC = 1946;
+    public static final int GHOMMALS_HILT_1_TELEPORT_RED_GRAPHIC = 1952;
+    public static final int GHOMMALS_HILT_1_TELEPORT_RED_ARRIVAL_GRAPHIC = 1958;
+    public static final int GHOMMALS_HILT_2_TELEPORT = 9119;
+    public static final int GHOMMALS_HILT_2_TELEPORT_FEMALE = 9120;
+    public static final int GHOMMALS_HILT_2_TELEPORT_ARRIVAL = 9121;
+    public static final int GHOMMALS_HILT_2_TELEPORT_GRAPHIC = 1941;
+    public static final int GHOMMALS_HILT_2_TELEPORT_ARRIVAL_GRAPHIC = 1947;
+    public static final int GHOMMALS_HILT_2_TELEPORT_RED_GRAPHIC = 1953;
+    public static final int GHOMMALS_HILT_2_TELEPORT_RED_ARRIVAL_GRAPHIC = 1959;
+    public static final int GHOMMALS_HILT_3_TELEPORT = 9122;
+    public static final int GHOMMALS_HILT_3_TELEPORT_FEMALE = 9123;
+    public static final int GHOMMALS_HILT_3_TELEPORT_ARRIVAL = 9124;
+    public static final int GHOMMALS_HILT_3_TELEPORT_GRAPHIC = 1942;
+    public static final int GHOMMALS_HILT_3_TELEPORT_ARRIVAL_GRAPHIC = 1948;
+    public static final int GHOMMALS_HILT_3_TELEPORT_RED_GRAPHIC = 1954;
+    public static final int GHOMMALS_HILT_3_TELEPORT_RED_ARRIVAL_GRAPHIC = 1960;
+    public static final int GHOMMALS_HILT_4_TELEPORT = 9125;
+    public static final int GHOMMALS_HILT_4_TELEPORT_FEMALE = 9126;
+    public static final int GHOMMALS_HILT_4_TELEPORT_ARRIVAL = 9127;
+    public static final int GHOMMALS_HILT_4_TELEPORT_GRAPHIC = 1943;
+    public static final int GHOMMALS_HILT_4_TELEPORT_ARRIVAL_GRAPHIC = 1949;
+    public static final int GHOMMALS_HILT_4_TELEPORT_RED_GRAPHIC = 1955;
+    public static final int GHOMMALS_HILT_4_TELEPORT_RED_ARRIVAL_GRAPHIC = 1961;
+    public static final int GHOMMALS_HILT_5_TELEPORT = 9128;
+    public static final int GHOMMALS_HILT_5_TELEPORT_FEMALE = 9129;
+    public static final int GHOMMALS_HILT_5_TELEPORT_ARRIVAL = 9130;
+    public static final int GHOMMALS_HILT_5_TELEPORT_GRAPHIC = 1944;
+    public static final int GHOMMALS_HILT_5_TELEPORT_ARRIVAL_GRAPHIC = 1950;
+    public static final int GHOMMALS_HILT_5_TELEPORT_RED_GRAPHIC = 1956;
+    public static final int GHOMMALS_HILT_5_TELEPORT_RED_ARRIVAL_GRAPHIC = 1962;
+    public static final int GHOMMALS_HILT_6_TELEPORT = 9131;
+    public static final int GHOMMALS_HILT_6_TELEPORT_FEMALE = 9132;
+    public static final int GHOMMALS_HILT_6_TELEPORT_ARRIVAL = 9133;
+    public static final int GHOMMALS_HILT_6_TELEPORT_GRAPHIC = 1945;
+    public static final int GHOMMALS_HILT_6_TELEPORT_ARRIVAL_GRAPHIC = 1951;
+    public static final int GHOMMALS_HILT_6_TELEPORT_RED_GRAPHIC = 1957;
+    public static final int GHOMMALS_HILT_6_TELEPORT_RED_ARRIVAL_GRAPHIC = 1963;
+    public static final int GHOMMALS_HILT_5_AVERNIC_TELEPORT = 9837;
+    public static final int GHOMMALS_HILT_5_AVERNIC_TELEPORT_FEMALE = 9838;
+    public static final int GHOMMALS_HILT_5_AVERNIC_TELEPORT_ARRIVAL = 9839;
+    public static final int GHOMMALS_HILT_5_AVERNIC_TELEPORT_GRAPHIC = 2272;
+    public static final int GHOMMALS_HILT_5_AVERNIC_TELEPORT_ARRIVAL_GRAPHIC = 2274;
+    public static final int GHOMMALS_HILT_5_AVERNIC_TELEPORT_RED_GRAPHIC = 2276;
+    public static final int GHOMMALS_HILT_5_AVERNIC_TELEPORT_RED_ARRIVAL_GRAPHIC = 2278;
+    public static final int GHOMMALS_HILT_6_AVERNIC_TELEPORT = 9840;
+    public static final int GHOMMALS_HILT_6_AVERNIC_TELEPORT_FEMALE = 9841;
+    public static final int GHOMMALS_HILT_6_AVERNIC_TELEPORT_ARRIVAL = 9842;
+    public static final int GHOMMALS_HILT_6_AVERNIC_TELEPORT_GRAPHIC = 2273;
+    public static final int GHOMMALS_HILT_6_AVERNIC_TELEPORT_ARRIVAL_GRAPHIC = 2275;
+    public static final int GHOMMALS_HILT_6_AVERNIC_TELEPORT_RED_GRAPHIC = 2277;
+    public static final int GHOMMALS_HILT_6_AVERNIC_TELEPORT_RED_ARRIVAL_GRAPHIC = 2279;
+    public static final int GHOMMALS_HILT_TELEPORT_SOUND = 200;
+
+    // Second half of the quetzal whistle teleport (player pose, then the bird)
+    public static final int QUETZAL_TELEPORT = 10944;
+    public static final int QUETZAL_TELEPORT_GRAPHIC = 2735;
+    public static final int QUETZAL_TELEPORT_SOUND = -1;
+
     private AnimationConstants() {
     }
 }

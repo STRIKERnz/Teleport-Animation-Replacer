@@ -1,16 +1,21 @@
 package com.strikernz.tpreplacer;
 
 import com.google.inject.Provides;
+import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.ActorSpotAnim;
 import net.runelite.api.Client;
 import net.runelite.api.Player;
+import net.runelite.api.PlayerComposition;
 import net.runelite.api.events.AnimationChanged;
 import net.runelite.api.events.AreaSoundEffectPlayed;
+import net.runelite.api.events.ClientTick;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.GraphicChanged;
 import net.runelite.api.events.GraphicsObjectCreated;
 import net.runelite.api.events.SoundEffectPlayed;
 import net.runelite.api.coords.LocalPoint;
+import net.runelite.api.coords.WorldPoint;
+import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
@@ -31,6 +36,7 @@ import java.util.Set;
         description = "Replace teleport animations with different animations, graphics, and sounds",
         tags = {"animation", "teleport", "sound", "graphic", "customization", "cowbell", "cosmetic"}
 )
+@Slf4j
 public class TpReplacer extends Plugin {
     private static final int NO_ID = -1;
     private static final int ARRIVAL_SOUND_DELAY_TICKS = 2;
@@ -44,6 +50,12 @@ public class TpReplacer extends Plugin {
     private static final int ARDOUGNE_FARMING_GRAPHIC_HEIGHT = 64;
     private static final int DESERT_AMULET_GRAPHIC_HEIGHT = 80;
     private static final int MORYTANIA_LEGS_GRAPHIC_HEIGHT = 96;
+    // Quetzal timing (client ticks / frames) was tuned in-game against the standard spellbook teleport.
+    private static final int QUETZAL_ANIMATION_START_FRAME = 25;
+    private static final int QUETZAL_GRAPHIC_START_FRAME = 1;
+    private static final int QUETZAL_GRAPHIC_DELAY_CLIENT_TICKS = 38;
+    private static final int QUETZAL_MAX_CLIENT_TICKS = 120;
+    private static final int QUETZAL_SPOT_ANIM_KEY = 0x52A71;
 
     /**
      * Known teleport sound IDs to matching presets, built once for fast sound suppression.
@@ -82,6 +94,20 @@ public class TpReplacer extends Plugin {
                 TeleportAnimation.RING_OF_SHADOWS_ALL);
         PER_TELEPORT_OVERRIDES.put(TeleportAnimation.PHARAOHS_SCEPTRE, config -> config.perOverridePharaohsSceptre());
         PER_TELEPORT_OVERRIDES.put(TeleportAnimation.GIANTSOUL_AMULET, config -> config.perOverrideGiantsoulAmulet());
+        PER_TELEPORT_OVERRIDES.put(TeleportAnimation.VOLCANIC_MINE, config -> config.perOverrideVolcanicMine());
+        putPerOverride(config -> config.perOverrideGhommalsHilt(),
+                TeleportAnimation.GHOMMALS_HILT_1,
+                TeleportAnimation.GHOMMALS_HILT_2,
+                TeleportAnimation.GHOMMALS_HILT_3,
+                TeleportAnimation.GHOMMALS_HILT_4,
+                TeleportAnimation.GHOMMALS_HILT_5,
+                TeleportAnimation.GHOMMALS_HILT_6,
+                TeleportAnimation.GHOMMALS_HILT_5_AVERNIC,
+                TeleportAnimation.GHOMMALS_HILT_6_AVERNIC,
+                TeleportAnimation.GHOMMALS_HILT_5_RED,
+                TeleportAnimation.GHOMMALS_HILT_6_RED,
+                TeleportAnimation.GHOMMALS_HILT_5_AVERNIC_RED,
+                TeleportAnimation.GHOMMALS_HILT_6_AVERNIC_RED);
     }
 
     private static void putPerOverride(PerTeleportOverride override, TeleportAnimation... sources) {
@@ -99,6 +125,8 @@ public class TpReplacer extends Plugin {
     private final Map<Integer, Integer> ignoredAnimationUntilTick = new HashMap<>();
     @Inject
     private Client client;
+    @Inject
+    private ClientThread clientThread;
     @Inject
     private TpreplacerConfig config;
     /**
@@ -127,6 +155,14 @@ public class TpReplacer extends Plugin {
     private int arrivalSoundId = NO_ID;
     private int arrivalSoundDelay = ARRIVAL_SOUND_DELAY_TICKS;
     private int scrollVisualSuppressUntilTick = NO_ID;
+    /**
+     * Quetzal replacement state: client ticks since start ({@code 0} = inactive), the source animation
+     * the server keeps re-sending, and the tile it started on.
+     */
+    private int quetzalClientTicks;
+    private int quetzalSourceAnimationId = NO_ID;
+    private WorldPoint quetzalOrigin;
+    private boolean quetzalGraphicStarted;
 
     private static CustomTeleportIds parseCustomIds(String ids) {
         if (ids == null || ids.trim().isEmpty()) {
@@ -160,6 +196,7 @@ public class TpReplacer extends Plugin {
 
     @Override
     protected void shutDown() {
+        clientThread.invoke(() -> stopQuetzal(client.getLocalPlayer()));
         resetState();
     }
 
@@ -171,6 +208,12 @@ public class TpReplacer extends Plugin {
         }
 
         int animationId = player.getAnimation();
+        log.debug("Tick {}: local player animation {}", client.getTickCount(), animationId);
+
+        if (quetzalClientTicks > 0 && animationId == quetzalSourceAnimationId) {
+            applyQuetzalAnimation(player);
+            return;
+        }
 
         if (shouldIgnoreAnimation(animationId)) {
             return;
@@ -188,21 +231,15 @@ public class TpReplacer extends Plugin {
             return;
         }
 
-        // Suppress the Pendent of Ates arrival animation when the pendent is being overridden
-        if (animationId == AnimationConstants.PENDENT_OF_ATES_TELEPORT_ARRIVAL) {
-            TeleportAnimation pendentSelected = getSelectedForAnimation(AnimationConstants.PENDENT_OF_ATES_TELEPORT);
-            if (pendentSelected != TeleportAnimation.NONE && pendentSelected != TeleportAnimation.PENDENT_OF_ATES) {
-                player.setAnimation(NO_ID);
-                return;
+        // Suppress the landing animation and graphic of an overridden two-phase teleport
+        TeleportAnimation arrivalSource = TeleportAnimation.fromArrivalAnimationId(animationId);
+        if (arrivalSource != null && isOverridden(arrivalSource)) {
+            suppressGraphic(player, arrivalSource.getArrivalGraphicId());
+            for (int graphicId : arrivalSource.getAlternateGraphicIds()) {
+                suppressGraphic(player, graphicId);
             }
-        }
-
-        if (animationId == AnimationConstants.ROYAL_SEED_POD_TELEPORT_ARRIVAL) {
-            TeleportAnimation seedPodSelected = getSelectedForAnimation(AnimationConstants.ROYAL_SEED_POD_TELEPORT);
-            if (seedPodSelected != TeleportAnimation.NONE && seedPodSelected != TeleportAnimation.ROYAL_SEED_POD) {
-                player.setAnimation(NO_ID);
-                return;
-            }
+            player.setAnimation(NO_ID);
+            return;
         }
 
         TeleportAnimation original = getSourceForPlayerAnimation(player, animationId);
@@ -226,7 +263,7 @@ public class TpReplacer extends Plugin {
                 : CustomTeleportIds.EMPTY;
         int selectedAnimationId = selected == TeleportAnimation.CUSTOM
                 ? customIds.animationId
-                : selected.getAnimationId();
+                : selected.getAnimationId(isFemale(player));
 
         // Already playing the target animation AND graphic — nothing to override
         int selectedGraphicId = selected == TeleportAnimation.CUSTOM ? customIds.graphicId : selected.getGraphicId();
@@ -246,6 +283,12 @@ public class TpReplacer extends Plugin {
         suppressSourceAnimationGraphic(player, original, selectedAnimationId);
 
         clearPendingArrival();
+        stopQuetzal(player);
+
+        if (selected == TeleportAnimation.QUETZAL) {
+            startQuetzal(player, animationId);
+            return;
+        }
 
         // Cowbell has a special two-phase animation (cast + landing)
         if (selected == TeleportAnimation.COWBELL) {
@@ -280,14 +323,15 @@ public class TpReplacer extends Plugin {
             return;
         }
 
-        if (selected == TeleportAnimation.ROYAL_SEED_POD) {
+        if (selected.isTwoPhase()) {
             startTwoPhaseTeleport(player,
-                    AnimationConstants.ROYAL_SEED_POD_TELEPORT,
-                    AnimationConstants.ROYAL_SEED_POD_TELEPORT_GRAPHIC,
-                    AnimationConstants.ROYAL_SEED_POD_TELEPORT_ARRIVAL,
-                    AnimationConstants.ROYAL_SEED_POD_TELEPORT_ARRIVAL_GRAPHIC,
+                    selectedAnimationId,
+                    selected.getGraphicId(),
+                    selected.getArrivalAnimationId(),
+                    selected.getArrivalGraphicId(),
                     NO_ID,
                     0);
+            playSoundOnce(selected.getSoundId());
             return;
         }
 
@@ -335,9 +379,32 @@ public class TpReplacer extends Plugin {
     }
 
     @Subscribe
+    public void onClientTick(ClientTick event) {
+        if (quetzalClientTicks == 0) {
+            return;
+        }
+
+        Player player = client.getLocalPlayer();
+        if (player == null || !player.getWorldLocation().equals(quetzalOrigin)
+                || ++quetzalClientTicks > QUETZAL_MAX_CLIENT_TICKS) {
+            stopQuetzal(player);
+            return;
+        }
+
+        if (player.getAnimation() == quetzalSourceAnimationId) {
+            applyQuetzalAnimation(player);
+        }
+
+        if (!quetzalGraphicStarted && quetzalClientTicks >= QUETZAL_GRAPHIC_DELAY_CLIENT_TICKS) {
+            startQuetzalGraphic(player);
+        }
+    }
+
+    @Subscribe
     public void onSoundEffectPlayed(SoundEffectPlayed event) {
         int soundId = event.getSoundId();
         int tick = client.getTickCount();
+        log.debug("Sound effect {} (local player source: {})", soundId, event.getSource() == client.getLocalPlayer());
 
         // Don't suppress a sound the plugin itself just triggered
         if (isPluginPlayedSound(soundId, tick)) {
@@ -359,6 +426,7 @@ public class TpReplacer extends Plugin {
     public void onAreaSoundEffectPlayed(AreaSoundEffectPlayed event) {
         int soundId = event.getSoundId();
         int tick = client.getTickCount();
+        log.debug("Area sound effect {} (local player source: {})", soundId, event.getSource() == client.getLocalPlayer());
 
         // Don't suppress a sound the plugin itself just triggered
         if (isPluginPlayedSound(soundId, tick)) {
@@ -384,6 +452,13 @@ public class TpReplacer extends Plugin {
             return;
         }
 
+        if (log.isDebugEnabled()) {
+            List<Integer> spotAnimIds = new ArrayList<>();
+            for (ActorSpotAnim spotAnim : player.getSpotAnims()) {
+                spotAnimIds.add(spotAnim.getId());
+            }
+            log.debug("Tick {}: local player graphics {}", client.getTickCount(), spotAnimIds);
+        }
         removeSuppressedSpotAnims(player);
     }
 
@@ -468,6 +543,49 @@ public class TpReplacer extends Plugin {
         }
 
         arrivalAnimationResetTicksRemaining--;
+    }
+
+    private void startQuetzal(Player player, int sourceAnimationId) {
+        quetzalClientTicks = 1;
+        quetzalSourceAnimationId = sourceAnimationId;
+        quetzalOrigin = player.getWorldLocation();
+        quetzalGraphicStarted = false;
+        applyQuetzalAnimation(player);
+    }
+
+    private void applyQuetzalAnimation(Player player) {
+        ignoreAnimation(AnimationConstants.QUETZAL_TELEPORT);
+        player.setAnimation(AnimationConstants.QUETZAL_TELEPORT);
+        player.setAnimationFrame(QUETZAL_ANIMATION_START_FRAME);
+    }
+
+    private void startQuetzalGraphic(Player player) {
+        // Started once: re-applying the player animation must not restart the bird's timeline.
+        quetzalGraphicStarted = true;
+        player.createSpotAnim(QUETZAL_SPOT_ANIM_KEY, AnimationConstants.QUETZAL_TELEPORT_GRAPHIC, 0, 0);
+        for (ActorSpotAnim spotAnim : player.getSpotAnims()) {
+            if (spotAnim.getHash() == QUETZAL_SPOT_ANIM_KEY) {
+                spotAnim.setFrame(QUETZAL_GRAPHIC_START_FRAME);
+                spotAnim.setCycle(0);
+                break;
+            }
+        }
+    }
+
+    private void stopQuetzal(Player player) {
+        if (player != null && quetzalGraphicStarted) {
+            player.removeSpotAnim(QUETZAL_SPOT_ANIM_KEY);
+        }
+
+        quetzalClientTicks = 0;
+        quetzalSourceAnimationId = NO_ID;
+        quetzalOrigin = null;
+        quetzalGraphicStarted = false;
+    }
+
+    private static boolean isFemale(Player player) {
+        PlayerComposition composition = player.getPlayerComposition();
+        return composition != null && composition.isFemale();
     }
 
     private void applyDirectReplacement(Player player, int animationId, int graphicId, int soundId) {
@@ -555,13 +673,24 @@ public class TpReplacer extends Plugin {
     }
 
     private void suppressOriginalGraphics(Player player, TeleportAnimation original, int replacementGraphicId) {
-        int originalGraphicId = original.getGraphicId();
-        if (originalGraphicId == NO_ID || originalGraphicId == replacementGraphicId) {
+        if (original.getGraphicId() != replacementGraphicId) {
+            suppressGraphic(player, original.getGraphicId());
+        }
+
+        for (int graphicId : original.getAlternateGraphicIds()) {
+            if (graphicId != replacementGraphicId) {
+                suppressGraphic(player, graphicId);
+            }
+        }
+    }
+
+    private void suppressGraphic(Player player, int graphicId) {
+        if (graphicId == NO_ID) {
             return;
         }
 
-        suppressedGraphicUntilTick.put(originalGraphicId, client.getTickCount() + ORIGINAL_GRAPHIC_SUPPRESS_TICKS);
-        removeSpotAnim(player, originalGraphicId);
+        suppressedGraphicUntilTick.put(graphicId, client.getTickCount() + ORIGINAL_GRAPHIC_SUPPRESS_TICKS);
+        removeSpotAnim(player, graphicId);
     }
 
     private void suppressSourceAnimationGraphic(Player player, TeleportAnimation original, int replacementAnimationId) {
@@ -619,14 +748,6 @@ public class TpReplacer extends Plugin {
         }
     }
 
-    /**
-     * Resolves the override animation for a given source animation ID.
-     * Per-teleport settings take priority; if set to NONE the global setting is used.
-     */
-    private TeleportAnimation getSelectedForAnimation(int animationId) {
-        return getSelectedForSource(TeleportAnimation.fromAnimationId(animationId));
-    }
-
     private TeleportAnimation getSourceForPlayerAnimation(Player player, int animationId) {
         if (player.hasSpotAnim(AnimationConstants.DESERT_AMULET_TELEPORT_GRAPHIC)) {
             return TeleportAnimation.DESERT_AMULET;
@@ -653,7 +774,7 @@ public class TpReplacer extends Plugin {
                     : null;
         }
 
-        return TeleportAnimation.fromAnimationId(animationId);
+        return TeleportAnimation.fromAnimationId(animationId, player::hasSpotAnim);
     }
 
     private TeleportAnimation getSelectedForSource(TeleportAnimation source) {
