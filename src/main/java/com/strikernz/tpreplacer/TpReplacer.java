@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.ActorSpotAnim;
 import net.runelite.api.Client;
 import net.runelite.api.Player;
+import net.runelite.api.PlayerComposition;
 import net.runelite.api.events.AnimationChanged;
 import net.runelite.api.events.AreaSoundEffectPlayed;
 import net.runelite.api.events.ClientTick;
@@ -203,7 +204,7 @@ public class TpReplacer extends Plugin {
         }
 
         int animationId = player.getAnimation();
-        log.debug("Local player animation {}", animationId);
+        log.debug("Tick {}: local player animation {}", client.getTickCount(), animationId);
 
         if (quetzalClientTicks > 0 && animationId == quetzalSourceAnimationId) {
             applyQuetzalAnimation(player);
@@ -258,7 +259,7 @@ public class TpReplacer extends Plugin {
                 : CustomTeleportIds.EMPTY;
         int selectedAnimationId = selected == TeleportAnimation.CUSTOM
                 ? customIds.animationId
-                : selected.getAnimationId();
+                : selected.getAnimationId(isFemale(player));
 
         // Already playing the target animation AND graphic — nothing to override
         int selectedGraphicId = selected == TeleportAnimation.CUSTOM ? customIds.graphicId : selected.getGraphicId();
@@ -320,7 +321,7 @@ public class TpReplacer extends Plugin {
 
         if (selected.isTwoPhase()) {
             startTwoPhaseTeleport(player,
-                    selected.getAnimationId(),
+                    selectedAnimationId,
                     selected.getGraphicId(),
                     selected.getArrivalAnimationId(),
                     selected.getArrivalGraphicId(),
@@ -447,7 +448,13 @@ public class TpReplacer extends Plugin {
             return;
         }
 
-        log.debug("Local player graphic {}", player.getGraphic());
+        if (log.isDebugEnabled()) {
+            List<Integer> spotAnimIds = new ArrayList<>();
+            for (ActorSpotAnim spotAnim : player.getSpotAnims()) {
+                spotAnimIds.add(spotAnim.getId());
+            }
+            log.debug("Tick {}: local player graphics {}", client.getTickCount(), spotAnimIds);
+        }
         removeSuppressedSpotAnims(player);
     }
 
@@ -570,6 +577,11 @@ public class TpReplacer extends Plugin {
         quetzalSourceAnimationId = NO_ID;
         quetzalOrigin = null;
         quetzalGraphicStarted = false;
+    }
+
+    private static boolean isFemale(Player player) {
+        PlayerComposition composition = player.getPlayerComposition();
+        return composition != null && composition.isFemale();
     }
 
     private void applyDirectReplacement(Player player, int animationId, int graphicId, int soundId) {

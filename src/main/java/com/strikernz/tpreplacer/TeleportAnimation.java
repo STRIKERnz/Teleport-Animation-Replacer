@@ -77,35 +77,35 @@ public enum TeleportAnimation {
     VOLCANIC_MINE(AnimationConstants.VOLCANIC_MINE_TELEPORT, AnimationConstants.VOLCANIC_MINE_TELEPORT_GRAPHIC,
             AnimationConstants.VOLCANIC_MINE_TELEPORT_SOUND, "Volcanic Mine Tab",
             AnimationConstants.VOLCANIC_MINE_TELEPORT_ARRIVAL, -1),
-    GHOMMALS_HILT_1(AnimationConstants.GHOMMALS_HILT_1_TELEPORT, AnimationConstants.GHOMMALS_HILT_1_TELEPORT_GRAPHIC,
+    GHOMMALS_HILT_1(AnimationConstants.GHOMMALS_HILT_1_TELEPORT, AnimationConstants.GHOMMALS_HILT_1_TELEPORT_FEMALE, AnimationConstants.GHOMMALS_HILT_1_TELEPORT_GRAPHIC,
             AnimationConstants.GHOMMALS_HILT_TELEPORT_SOUND, "Ghommal's Hilt 1",
             AnimationConstants.GHOMMALS_HILT_1_TELEPORT_ARRIVAL, AnimationConstants.GHOMMALS_HILT_1_TELEPORT_ARRIVAL_GRAPHIC,
             AnimationConstants.GHOMMALS_HILT_1_TELEPORT_RED_GRAPHIC, AnimationConstants.GHOMMALS_HILT_1_TELEPORT_RED_ARRIVAL_GRAPHIC),
-    GHOMMALS_HILT_2(AnimationConstants.GHOMMALS_HILT_2_TELEPORT, AnimationConstants.GHOMMALS_HILT_2_TELEPORT_GRAPHIC,
+    GHOMMALS_HILT_2(AnimationConstants.GHOMMALS_HILT_2_TELEPORT, AnimationConstants.GHOMMALS_HILT_2_TELEPORT_FEMALE, AnimationConstants.GHOMMALS_HILT_2_TELEPORT_GRAPHIC,
             AnimationConstants.GHOMMALS_HILT_TELEPORT_SOUND, "Ghommal's Hilt 2",
             AnimationConstants.GHOMMALS_HILT_2_TELEPORT_ARRIVAL, AnimationConstants.GHOMMALS_HILT_2_TELEPORT_ARRIVAL_GRAPHIC,
             AnimationConstants.GHOMMALS_HILT_2_TELEPORT_RED_GRAPHIC, AnimationConstants.GHOMMALS_HILT_2_TELEPORT_RED_ARRIVAL_GRAPHIC),
-    GHOMMALS_HILT_3(AnimationConstants.GHOMMALS_HILT_3_TELEPORT, AnimationConstants.GHOMMALS_HILT_3_TELEPORT_GRAPHIC,
+    GHOMMALS_HILT_3(AnimationConstants.GHOMMALS_HILT_3_TELEPORT, AnimationConstants.GHOMMALS_HILT_3_TELEPORT_FEMALE, AnimationConstants.GHOMMALS_HILT_3_TELEPORT_GRAPHIC,
             AnimationConstants.GHOMMALS_HILT_TELEPORT_SOUND, "Ghommal's Hilt 3",
             AnimationConstants.GHOMMALS_HILT_3_TELEPORT_ARRIVAL, AnimationConstants.GHOMMALS_HILT_3_TELEPORT_ARRIVAL_GRAPHIC,
             AnimationConstants.GHOMMALS_HILT_3_TELEPORT_RED_GRAPHIC, AnimationConstants.GHOMMALS_HILT_3_TELEPORT_RED_ARRIVAL_GRAPHIC),
-    GHOMMALS_HILT_4(AnimationConstants.GHOMMALS_HILT_4_TELEPORT, AnimationConstants.GHOMMALS_HILT_4_TELEPORT_GRAPHIC,
+    GHOMMALS_HILT_4(AnimationConstants.GHOMMALS_HILT_4_TELEPORT, AnimationConstants.GHOMMALS_HILT_4_TELEPORT_FEMALE, AnimationConstants.GHOMMALS_HILT_4_TELEPORT_GRAPHIC,
             AnimationConstants.GHOMMALS_HILT_TELEPORT_SOUND, "Ghommal's Hilt 4",
             AnimationConstants.GHOMMALS_HILT_4_TELEPORT_ARRIVAL, AnimationConstants.GHOMMALS_HILT_4_TELEPORT_ARRIVAL_GRAPHIC,
             AnimationConstants.GHOMMALS_HILT_4_TELEPORT_RED_GRAPHIC, AnimationConstants.GHOMMALS_HILT_4_TELEPORT_RED_ARRIVAL_GRAPHIC),
-    GHOMMALS_HILT_5(AnimationConstants.GHOMMALS_HILT_5_TELEPORT, AnimationConstants.GHOMMALS_HILT_5_TELEPORT_GRAPHIC,
+    GHOMMALS_HILT_5(AnimationConstants.GHOMMALS_HILT_5_TELEPORT, AnimationConstants.GHOMMALS_HILT_5_TELEPORT_FEMALE, AnimationConstants.GHOMMALS_HILT_5_TELEPORT_GRAPHIC,
             AnimationConstants.GHOMMALS_HILT_TELEPORT_SOUND, "Ghommal's Hilt 5",
             AnimationConstants.GHOMMALS_HILT_5_TELEPORT_ARRIVAL, AnimationConstants.GHOMMALS_HILT_5_TELEPORT_ARRIVAL_GRAPHIC,
             AnimationConstants.GHOMMALS_HILT_5_TELEPORT_RED_GRAPHIC, AnimationConstants.GHOMMALS_HILT_5_TELEPORT_RED_ARRIVAL_GRAPHIC),
-    GHOMMALS_HILT_6(AnimationConstants.GHOMMALS_HILT_6_TELEPORT, AnimationConstants.GHOMMALS_HILT_6_TELEPORT_GRAPHIC,
+    GHOMMALS_HILT_6(AnimationConstants.GHOMMALS_HILT_6_TELEPORT, AnimationConstants.GHOMMALS_HILT_6_TELEPORT_FEMALE, AnimationConstants.GHOMMALS_HILT_6_TELEPORT_GRAPHIC,
             AnimationConstants.GHOMMALS_HILT_TELEPORT_SOUND, "Ghommal's Hilt 6",
             AnimationConstants.GHOMMALS_HILT_6_TELEPORT_ARRIVAL, AnimationConstants.GHOMMALS_HILT_6_TELEPORT_ARRIVAL_GRAPHIC,
             AnimationConstants.GHOMMALS_HILT_6_TELEPORT_RED_GRAPHIC, AnimationConstants.GHOMMALS_HILT_6_TELEPORT_RED_ARRIVAL_GRAPHIC),
-    GHOMMALS_HILT_5_AVERNIC(AnimationConstants.GHOMMALS_HILT_5_AVERNIC_TELEPORT, AnimationConstants.GHOMMALS_HILT_5_AVERNIC_TELEPORT_GRAPHIC,
+    GHOMMALS_HILT_5_AVERNIC(AnimationConstants.GHOMMALS_HILT_5_AVERNIC_TELEPORT, AnimationConstants.GHOMMALS_HILT_5_AVERNIC_TELEPORT_FEMALE, AnimationConstants.GHOMMALS_HILT_5_AVERNIC_TELEPORT_GRAPHIC,
             AnimationConstants.GHOMMALS_HILT_TELEPORT_SOUND, "Ghommal's Hilt 5 Avernic",
             AnimationConstants.GHOMMALS_HILT_5_AVERNIC_TELEPORT_ARRIVAL, AnimationConstants.GHOMMALS_HILT_5_AVERNIC_TELEPORT_ARRIVAL_GRAPHIC,
             AnimationConstants.GHOMMALS_HILT_5_AVERNIC_TELEPORT_RED_GRAPHIC, AnimationConstants.GHOMMALS_HILT_5_AVERNIC_TELEPORT_RED_ARRIVAL_GRAPHIC),
-    GHOMMALS_HILT_6_AVERNIC(AnimationConstants.GHOMMALS_HILT_6_AVERNIC_TELEPORT, AnimationConstants.GHOMMALS_HILT_6_AVERNIC_TELEPORT_GRAPHIC,
+    GHOMMALS_HILT_6_AVERNIC(AnimationConstants.GHOMMALS_HILT_6_AVERNIC_TELEPORT, AnimationConstants.GHOMMALS_HILT_6_AVERNIC_TELEPORT_FEMALE, AnimationConstants.GHOMMALS_HILT_6_AVERNIC_TELEPORT_GRAPHIC,
             AnimationConstants.GHOMMALS_HILT_TELEPORT_SOUND, "Ghommal's Hilt 6 Avernic",
             AnimationConstants.GHOMMALS_HILT_6_AVERNIC_TELEPORT_ARRIVAL, AnimationConstants.GHOMMALS_HILT_6_AVERNIC_TELEPORT_ARRIVAL_GRAPHIC,
             AnimationConstants.GHOMMALS_HILT_6_AVERNIC_TELEPORT_RED_GRAPHIC, AnimationConstants.GHOMMALS_HILT_6_AVERNIC_TELEPORT_RED_ARRIVAL_GRAPHIC),
@@ -121,6 +121,9 @@ public enum TeleportAnimation {
             if (ta.animationId > 0 && ta != QUETZAL) {
                 BY_ANIMATION_ID.put(ta.animationId, ta);
             }
+            if (ta.femaleAnimationId > 0) {
+                BY_ANIMATION_ID.put(ta.femaleAnimationId, ta);
+            }
             if (ta.arrivalAnimationId > 0) {
                 BY_ARRIVAL_ANIMATION_ID.put(ta.arrivalAnimationId, ta);
             }
@@ -135,6 +138,10 @@ public enum TeleportAnimation {
     }
 
     private final int animationId;
+    /**
+     * Cast animation for female body types when it differs from {@link #animationId} ({@code -1} = same).
+     */
+    private final int femaleAnimationId;
     private final int graphicId;
     private final int soundId;
     private final String name;
@@ -154,7 +161,13 @@ public enum TeleportAnimation {
 
     TeleportAnimation(int animationId, int graphicId, int soundId, String name,
                       int arrivalAnimationId, int arrivalGraphicId, int... alternateGraphicIds) {
+        this(animationId, -1, graphicId, soundId, name, arrivalAnimationId, arrivalGraphicId, alternateGraphicIds);
+    }
+
+    TeleportAnimation(int animationId, int femaleAnimationId, int graphicId, int soundId, String name,
+                      int arrivalAnimationId, int arrivalGraphicId, int... alternateGraphicIds) {
         this.animationId = animationId;
+        this.femaleAnimationId = femaleAnimationId;
         this.graphicId = graphicId;
         this.soundId = soundId;
         this.name = name;
@@ -165,6 +178,10 @@ public enum TeleportAnimation {
 
     public static TeleportAnimation fromAnimationId(int animationId) {
         return BY_ANIMATION_ID.get(animationId);
+    }
+
+    public int getAnimationId(boolean female) {
+        return female && femaleAnimationId != -1 ? femaleAnimationId : animationId;
     }
 
     public static TeleportAnimation fromArrivalAnimationId(int animationId) {
