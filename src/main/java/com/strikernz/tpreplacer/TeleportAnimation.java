@@ -3,10 +3,12 @@ package com.strikernz.tpreplacer;
 import lombok.Getter;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.function.IntPredicate;
 
 /**
@@ -130,6 +132,11 @@ public enum TeleportAnimation {
     QUETZAL(AnimationConstants.QUETZAL_TELEPORT, AnimationConstants.QUETZAL_TELEPORT_GRAPHIC,
             AnimationConstants.QUETZAL_TELEPORT_SOUND, "Quetzal");
 
+    // Keep Random from favouring the hilt: only tiers 5 and 6 (normal and red) are picked
+    private static final Set<TeleportAnimation> EXCLUDED_FROM_RANDOM = EnumSet.of(
+            GHOMMALS_HILT_1, GHOMMALS_HILT_2, GHOMMALS_HILT_3, GHOMMALS_HILT_4,
+            GHOMMALS_HILT_5_AVERNIC, GHOMMALS_HILT_6_AVERNIC,
+            GHOMMALS_HILT_5_AVERNIC_RED, GHOMMALS_HILT_6_AVERNIC_RED);
     private static final Map<Integer, TeleportAnimation> BY_ANIMATION_ID = new HashMap<>();
     private static final Map<Integer, TeleportAnimation> BY_ARRIVAL_ANIMATION_ID = new HashMap<>();
 
@@ -249,7 +256,7 @@ public enum TeleportAnimation {
     }
 
     private boolean isRandomChoice() {
-        return this != NONE && this != CUSTOM && this != RANDOM;
+        return this != NONE && this != CUSTOM && this != RANDOM && !EXCLUDED_FROM_RANDOM.contains(this);
     }
 
     @Override

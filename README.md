@@ -34,7 +34,7 @@ By default, the plugin replaces all teleports with the Cowbell Amulet animation.
 Open the plugin settings in RuneLite and configure:
 - **Override All** — the global animation applied to all teleports.
 - **Per Teleport** section — set a specific animation per teleport type; "None (Use Global)" falls back to the global setting
-- **Random** — available in both global and per-teleport selectors; picks from the built-in presets and skips None, Custom, and Random itself.
+- **Random** — available in both global and per-teleport selectors; picks from the built-in presets and skips None, Custom, and Random itself. Of the Ghommal's hilt presets, only tiers 5 and 6 (normal and red) are picked.
 - **Custom Options** — Advanced users can specify custom animation, graphic and sound IDs for each teleport type, allowing for anything, to be used as a replacement.
 
 ## Notes
