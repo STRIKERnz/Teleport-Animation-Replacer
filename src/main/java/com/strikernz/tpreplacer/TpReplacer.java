@@ -1,6 +1,7 @@
 package com.strikernz.tpreplacer;
 
 import com.google.inject.Provides;
+import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.ActorSpotAnim;
 import net.runelite.api.Client;
 import net.runelite.api.Player;
@@ -34,6 +35,7 @@ import java.util.Set;
         description = "Replace teleport animations with different animations, graphics, and sounds",
         tags = {"animation", "teleport", "sound", "graphic", "customization", "cowbell", "cosmetic"}
 )
+@Slf4j
 public class TpReplacer extends Plugin {
     private static final int NO_ID = -1;
     private static final int ARRIVAL_SOUND_DELAY_TICKS = 2;
@@ -91,6 +93,16 @@ public class TpReplacer extends Plugin {
                 TeleportAnimation.RING_OF_SHADOWS_ALL);
         PER_TELEPORT_OVERRIDES.put(TeleportAnimation.PHARAOHS_SCEPTRE, config -> config.perOverridePharaohsSceptre());
         PER_TELEPORT_OVERRIDES.put(TeleportAnimation.GIANTSOUL_AMULET, config -> config.perOverrideGiantsoulAmulet());
+        PER_TELEPORT_OVERRIDES.put(TeleportAnimation.VOLCANIC_MINE, config -> config.perOverrideVolcanicMine());
+        putPerOverride(config -> config.perOverrideGhommalsHilt(),
+                TeleportAnimation.GHOMMALS_HILT_1,
+                TeleportAnimation.GHOMMALS_HILT_2,
+                TeleportAnimation.GHOMMALS_HILT_3,
+                TeleportAnimation.GHOMMALS_HILT_4,
+                TeleportAnimation.GHOMMALS_HILT_5,
+                TeleportAnimation.GHOMMALS_HILT_6,
+                TeleportAnimation.GHOMMALS_HILT_5_AVERNIC,
+                TeleportAnimation.GHOMMALS_HILT_6_AVERNIC);
     }
 
     private static void putPerOverride(PerTeleportOverride override, TeleportAnimation... sources) {
@@ -191,6 +203,7 @@ public class TpReplacer extends Plugin {
         }
 
         int animationId = player.getAnimation();
+        log.debug("Local player animation {}", animationId);
 
         if (quetzalClientTicks > 0 && animationId == quetzalSourceAnimationId) {
             applyQuetzalAnimation(player);
@@ -213,21 +226,15 @@ public class TpReplacer extends Plugin {
             return;
         }
 
-        // Suppress the Pendent of Ates arrival animation when the pendent is being overridden
-        if (animationId == AnimationConstants.PENDENT_OF_ATES_TELEPORT_ARRIVAL) {
-            TeleportAnimation pendentSelected = getSelectedForAnimation(AnimationConstants.PENDENT_OF_ATES_TELEPORT);
-            if (pendentSelected != TeleportAnimation.NONE && pendentSelected != TeleportAnimation.PENDENT_OF_ATES) {
-                player.setAnimation(NO_ID);
-                return;
+        // Suppress the landing animation and graphic of an overridden two-phase teleport
+        TeleportAnimation arrivalSource = TeleportAnimation.fromArrivalAnimationId(animationId);
+        if (arrivalSource != null && isOverridden(arrivalSource)) {
+            suppressGraphic(player, arrivalSource.getArrivalGraphicId());
+            for (int graphicId : arrivalSource.getAlternateGraphicIds()) {
+                suppressGraphic(player, graphicId);
             }
-        }
-
-        if (animationId == AnimationConstants.ROYAL_SEED_POD_TELEPORT_ARRIVAL) {
-            TeleportAnimation seedPodSelected = getSelectedForAnimation(AnimationConstants.ROYAL_SEED_POD_TELEPORT);
-            if (seedPodSelected != TeleportAnimation.NONE && seedPodSelected != TeleportAnimation.ROYAL_SEED_POD) {
-                player.setAnimation(NO_ID);
-                return;
-            }
+            player.setAnimation(NO_ID);
+            return;
         }
 
         TeleportAnimation original = getSourceForPlayerAnimation(player, animationId);
@@ -311,14 +318,15 @@ public class TpReplacer extends Plugin {
             return;
         }
 
-        if (selected == TeleportAnimation.ROYAL_SEED_POD) {
+        if (selected.isTwoPhase()) {
             startTwoPhaseTeleport(player,
-                    AnimationConstants.ROYAL_SEED_POD_TELEPORT,
-                    AnimationConstants.ROYAL_SEED_POD_TELEPORT_GRAPHIC,
-                    AnimationConstants.ROYAL_SEED_POD_TELEPORT_ARRIVAL,
-                    AnimationConstants.ROYAL_SEED_POD_TELEPORT_ARRIVAL_GRAPHIC,
+                    selected.getAnimationId(),
+                    selected.getGraphicId(),
+                    selected.getArrivalAnimationId(),
+                    selected.getArrivalGraphicId(),
                     NO_ID,
                     0);
+            playSoundOnce(selected.getSoundId());
             return;
         }
 
@@ -391,6 +399,7 @@ public class TpReplacer extends Plugin {
     public void onSoundEffectPlayed(SoundEffectPlayed event) {
         int soundId = event.getSoundId();
         int tick = client.getTickCount();
+        log.debug("Sound effect {} (local player source: {})", soundId, event.getSource() == client.getLocalPlayer());
 
         // Don't suppress a sound the plugin itself just triggered
         if (isPluginPlayedSound(soundId, tick)) {
@@ -412,6 +421,7 @@ public class TpReplacer extends Plugin {
     public void onAreaSoundEffectPlayed(AreaSoundEffectPlayed event) {
         int soundId = event.getSoundId();
         int tick = client.getTickCount();
+        log.debug("Area sound effect {} (local player source: {})", soundId, event.getSource() == client.getLocalPlayer());
 
         // Don't suppress a sound the plugin itself just triggered
         if (isPluginPlayedSound(soundId, tick)) {
@@ -437,6 +447,7 @@ public class TpReplacer extends Plugin {
             return;
         }
 
+        log.debug("Local player graphic {}", player.getGraphic());
         removeSuppressedSpotAnims(player);
     }
 
@@ -646,13 +657,24 @@ public class TpReplacer extends Plugin {
     }
 
     private void suppressOriginalGraphics(Player player, TeleportAnimation original, int replacementGraphicId) {
-        int originalGraphicId = original.getGraphicId();
-        if (originalGraphicId == NO_ID || originalGraphicId == replacementGraphicId) {
+        if (original.getGraphicId() != replacementGraphicId) {
+            suppressGraphic(player, original.getGraphicId());
+        }
+
+        for (int graphicId : original.getAlternateGraphicIds()) {
+            if (graphicId != replacementGraphicId) {
+                suppressGraphic(player, graphicId);
+            }
+        }
+    }
+
+    private void suppressGraphic(Player player, int graphicId) {
+        if (graphicId == NO_ID) {
             return;
         }
 
-        suppressedGraphicUntilTick.put(originalGraphicId, client.getTickCount() + ORIGINAL_GRAPHIC_SUPPRESS_TICKS);
-        removeSpotAnim(player, originalGraphicId);
+        suppressedGraphicUntilTick.put(graphicId, client.getTickCount() + ORIGINAL_GRAPHIC_SUPPRESS_TICKS);
+        removeSpotAnim(player, graphicId);
     }
 
     private void suppressSourceAnimationGraphic(Player player, TeleportAnimation original, int replacementAnimationId) {
@@ -708,14 +730,6 @@ public class TpReplacer extends Plugin {
         for (int key : keysToRemove) {
             player.removeSpotAnim(key);
         }
-    }
-
-    /**
-     * Resolves the override animation for a given source animation ID.
-     * Per-teleport settings take priority; if set to NONE the global setting is used.
-     */
-    private TeleportAnimation getSelectedForAnimation(int animationId) {
-        return getSelectedForSource(TeleportAnimation.fromAnimationId(animationId));
     }
 
     private TeleportAnimation getSourceForPlayerAnimation(Player player, int animationId) {

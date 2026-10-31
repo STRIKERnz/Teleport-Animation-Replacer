@@ -24,6 +24,8 @@ A RuneLite plugin that replaces teleport animations with an alternative animatio
   - Pharaoh's Sceptre teleport
   - Ring of Shadows colour variants
   - Pendent of Ates teleport
+  - Volcanic Mine teleport tablet
+  - Ghommal's hilt teleports (all tiers, including Avernic)
 
 ## Default behavior
 By default, the plugin replaces all teleports with the Cowbell Amulet animation.
@@ -48,6 +50,7 @@ All notable changes to this project will be documented here
 ## [1.1.0] - 2026-11-01
 ### Added
 - Quetzal replacement preset (player animation and bird).
+- Volcanic Mine tab and Ghommal's hilt teleport presets and per-teleport override support.
 
 ## [1.0.9] - 2026-07-03
 ### Fixed

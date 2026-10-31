@@ -1,7 +1,6 @@
 package com.strikernz.tpreplacer;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,7 +12,6 @@ import java.util.Random;
  * Teleport animation presets that can be selected in the plugin configuration.
  */
 @Getter
-@RequiredArgsConstructor
 public enum TeleportAnimation {
     NONE(-1, -1, -1, "None (Use Global)"),
     CUSTOM(-1, -1, -1, "Custom (Use IDs)"),
@@ -29,7 +27,8 @@ public enum TeleportAnimation {
             AnimationConstants.ARDOUGNE_FARMING_TELEPORT_SOUND, "Ardougne Farming"),
     ROYAL_SEED_POD(AnimationConstants.ROYAL_SEED_POD_TELEPORT,
             AnimationConstants.ROYAL_SEED_POD_TELEPORT_GRAPHIC,
-            AnimationConstants.ROYAL_SEED_POD_TELEPORT_SOUND, "Royal Seed Pod"),
+            AnimationConstants.ROYAL_SEED_POD_TELEPORT_SOUND, "Royal Seed Pod",
+            AnimationConstants.ROYAL_SEED_POD_TELEPORT_ARRIVAL, AnimationConstants.ROYAL_SEED_POD_TELEPORT_ARRIVAL_GRAPHIC),
     ANCIENT(AnimationConstants.ANCIENT_TELEPORT, AnimationConstants.ANCIENT_TELEPORT_GRAPHIC,
             AnimationConstants.ANCIENT_TELEPORT_SOUND, "Ancient"),
     ARCEUUS(AnimationConstants.ARCEUUS_TELEPORT, AnimationConstants.ARCEUUS_TELEPORT_GRAPHIC,
@@ -58,7 +57,8 @@ public enum TeleportAnimation {
             AnimationConstants.PHARAOHS_SCEPTRE_TELEPORT_SOUND, "Pharaoh's Sceptre"),
     PENDENT_OF_ATES(AnimationConstants.PENDENT_OF_ATES_TELEPORT,
             AnimationConstants.PENDENT_OF_ATES_TELEPORT_GRAPHIC,
-            AnimationConstants.PENDENT_OF_ATES_TELEPORT_SOUND, "Pendent of Ates"),
+            AnimationConstants.PENDENT_OF_ATES_TELEPORT_SOUND, "Pendent of Ates",
+            AnimationConstants.PENDENT_OF_ATES_TELEPORT_ARRIVAL, AnimationConstants.PENDENT_OF_ATES_TELEPORT_ARRIVAL_GRAPHIC),
     RING_OF_SHADOWS_WHITE(AnimationConstants.RING_OF_SHADOWS_TELEPORT,
             AnimationConstants.RING_OF_SHADOWS_WHITE_GRAPHIC,
             AnimationConstants.RING_OF_SHADOWS_TELEPORT_SOUND, "Ring of Shadows (White)"),
@@ -74,16 +74,55 @@ public enum TeleportAnimation {
     RING_OF_SHADOWS_ALL(AnimationConstants.RING_OF_SHADOWS_TELEPORT,
             AnimationConstants.RING_OF_SHADOWS_ALL_GRAPHIC,
             AnimationConstants.RING_OF_SHADOWS_TELEPORT_SOUND, "Ring of Shadows (All)"),
+    VOLCANIC_MINE(AnimationConstants.VOLCANIC_MINE_TELEPORT, AnimationConstants.VOLCANIC_MINE_TELEPORT_GRAPHIC,
+            AnimationConstants.VOLCANIC_MINE_TELEPORT_SOUND, "Volcanic Mine Tab",
+            AnimationConstants.VOLCANIC_MINE_TELEPORT_ARRIVAL, -1),
+    GHOMMALS_HILT_1(AnimationConstants.GHOMMALS_HILT_1_TELEPORT, AnimationConstants.GHOMMALS_HILT_1_TELEPORT_GRAPHIC,
+            AnimationConstants.GHOMMALS_HILT_TELEPORT_SOUND, "Ghommal's Hilt 1",
+            AnimationConstants.GHOMMALS_HILT_1_TELEPORT_ARRIVAL, AnimationConstants.GHOMMALS_HILT_1_TELEPORT_ARRIVAL_GRAPHIC,
+            AnimationConstants.GHOMMALS_HILT_1_TELEPORT_RED_GRAPHIC, AnimationConstants.GHOMMALS_HILT_1_TELEPORT_RED_ARRIVAL_GRAPHIC),
+    GHOMMALS_HILT_2(AnimationConstants.GHOMMALS_HILT_2_TELEPORT, AnimationConstants.GHOMMALS_HILT_2_TELEPORT_GRAPHIC,
+            AnimationConstants.GHOMMALS_HILT_TELEPORT_SOUND, "Ghommal's Hilt 2",
+            AnimationConstants.GHOMMALS_HILT_2_TELEPORT_ARRIVAL, AnimationConstants.GHOMMALS_HILT_2_TELEPORT_ARRIVAL_GRAPHIC,
+            AnimationConstants.GHOMMALS_HILT_2_TELEPORT_RED_GRAPHIC, AnimationConstants.GHOMMALS_HILT_2_TELEPORT_RED_ARRIVAL_GRAPHIC),
+    GHOMMALS_HILT_3(AnimationConstants.GHOMMALS_HILT_3_TELEPORT, AnimationConstants.GHOMMALS_HILT_3_TELEPORT_GRAPHIC,
+            AnimationConstants.GHOMMALS_HILT_TELEPORT_SOUND, "Ghommal's Hilt 3",
+            AnimationConstants.GHOMMALS_HILT_3_TELEPORT_ARRIVAL, AnimationConstants.GHOMMALS_HILT_3_TELEPORT_ARRIVAL_GRAPHIC,
+            AnimationConstants.GHOMMALS_HILT_3_TELEPORT_RED_GRAPHIC, AnimationConstants.GHOMMALS_HILT_3_TELEPORT_RED_ARRIVAL_GRAPHIC),
+    GHOMMALS_HILT_4(AnimationConstants.GHOMMALS_HILT_4_TELEPORT, AnimationConstants.GHOMMALS_HILT_4_TELEPORT_GRAPHIC,
+            AnimationConstants.GHOMMALS_HILT_TELEPORT_SOUND, "Ghommal's Hilt 4",
+            AnimationConstants.GHOMMALS_HILT_4_TELEPORT_ARRIVAL, AnimationConstants.GHOMMALS_HILT_4_TELEPORT_ARRIVAL_GRAPHIC,
+            AnimationConstants.GHOMMALS_HILT_4_TELEPORT_RED_GRAPHIC, AnimationConstants.GHOMMALS_HILT_4_TELEPORT_RED_ARRIVAL_GRAPHIC),
+    GHOMMALS_HILT_5(AnimationConstants.GHOMMALS_HILT_5_TELEPORT, AnimationConstants.GHOMMALS_HILT_5_TELEPORT_GRAPHIC,
+            AnimationConstants.GHOMMALS_HILT_TELEPORT_SOUND, "Ghommal's Hilt 5",
+            AnimationConstants.GHOMMALS_HILT_5_TELEPORT_ARRIVAL, AnimationConstants.GHOMMALS_HILT_5_TELEPORT_ARRIVAL_GRAPHIC,
+            AnimationConstants.GHOMMALS_HILT_5_TELEPORT_RED_GRAPHIC, AnimationConstants.GHOMMALS_HILT_5_TELEPORT_RED_ARRIVAL_GRAPHIC),
+    GHOMMALS_HILT_6(AnimationConstants.GHOMMALS_HILT_6_TELEPORT, AnimationConstants.GHOMMALS_HILT_6_TELEPORT_GRAPHIC,
+            AnimationConstants.GHOMMALS_HILT_TELEPORT_SOUND, "Ghommal's Hilt 6",
+            AnimationConstants.GHOMMALS_HILT_6_TELEPORT_ARRIVAL, AnimationConstants.GHOMMALS_HILT_6_TELEPORT_ARRIVAL_GRAPHIC,
+            AnimationConstants.GHOMMALS_HILT_6_TELEPORT_RED_GRAPHIC, AnimationConstants.GHOMMALS_HILT_6_TELEPORT_RED_ARRIVAL_GRAPHIC),
+    GHOMMALS_HILT_5_AVERNIC(AnimationConstants.GHOMMALS_HILT_5_AVERNIC_TELEPORT, AnimationConstants.GHOMMALS_HILT_5_AVERNIC_TELEPORT_GRAPHIC,
+            AnimationConstants.GHOMMALS_HILT_TELEPORT_SOUND, "Ghommal's Hilt 5 Avernic",
+            AnimationConstants.GHOMMALS_HILT_5_AVERNIC_TELEPORT_ARRIVAL, AnimationConstants.GHOMMALS_HILT_5_AVERNIC_TELEPORT_ARRIVAL_GRAPHIC,
+            AnimationConstants.GHOMMALS_HILT_5_AVERNIC_TELEPORT_RED_GRAPHIC, AnimationConstants.GHOMMALS_HILT_5_AVERNIC_TELEPORT_RED_ARRIVAL_GRAPHIC),
+    GHOMMALS_HILT_6_AVERNIC(AnimationConstants.GHOMMALS_HILT_6_AVERNIC_TELEPORT, AnimationConstants.GHOMMALS_HILT_6_AVERNIC_TELEPORT_GRAPHIC,
+            AnimationConstants.GHOMMALS_HILT_TELEPORT_SOUND, "Ghommal's Hilt 6 Avernic",
+            AnimationConstants.GHOMMALS_HILT_6_AVERNIC_TELEPORT_ARRIVAL, AnimationConstants.GHOMMALS_HILT_6_AVERNIC_TELEPORT_ARRIVAL_GRAPHIC,
+            AnimationConstants.GHOMMALS_HILT_6_AVERNIC_TELEPORT_RED_GRAPHIC, AnimationConstants.GHOMMALS_HILT_6_AVERNIC_TELEPORT_RED_ARRIVAL_GRAPHIC),
     QUETZAL(AnimationConstants.QUETZAL_TELEPORT, AnimationConstants.QUETZAL_TELEPORT_GRAPHIC,
             AnimationConstants.QUETZAL_TELEPORT_SOUND, "Quetzal");
 
     private static final Map<Integer, TeleportAnimation> BY_ANIMATION_ID = new HashMap<>();
+    private static final Map<Integer, TeleportAnimation> BY_ARRIVAL_ANIMATION_ID = new HashMap<>();
 
     static {
         for (TeleportAnimation ta : values()) {
             // Quetzal is replacement-only: the real whistle teleport must not be detected as a source
             if (ta.animationId > 0 && ta != QUETZAL) {
                 BY_ANIMATION_ID.put(ta.animationId, ta);
+            }
+            if (ta.arrivalAnimationId > 0) {
+                BY_ARRIVAL_ANIMATION_ID.put(ta.arrivalAnimationId, ta);
             }
         }
 
@@ -99,9 +138,41 @@ public enum TeleportAnimation {
     private final int graphicId;
     private final int soundId;
     private final String name;
+    /**
+     * Landing animation and graphic of a two-phase teleport ({@code -1} = none).
+     */
+    private final int arrivalAnimationId;
+    private final int arrivalGraphicId;
+    /**
+     * Other colours of this teleport's graphics, suppressed along with the main ones.
+     */
+    private final int[] alternateGraphicIds;
+
+    TeleportAnimation(int animationId, int graphicId, int soundId, String name) {
+        this(animationId, graphicId, soundId, name, -1, -1);
+    }
+
+    TeleportAnimation(int animationId, int graphicId, int soundId, String name,
+                      int arrivalAnimationId, int arrivalGraphicId, int... alternateGraphicIds) {
+        this.animationId = animationId;
+        this.graphicId = graphicId;
+        this.soundId = soundId;
+        this.name = name;
+        this.arrivalAnimationId = arrivalAnimationId;
+        this.arrivalGraphicId = arrivalGraphicId;
+        this.alternateGraphicIds = alternateGraphicIds;
+    }
 
     public static TeleportAnimation fromAnimationId(int animationId) {
         return BY_ANIMATION_ID.get(animationId);
+    }
+
+    public static TeleportAnimation fromArrivalAnimationId(int animationId) {
+        return BY_ARRIVAL_ANIMATION_ID.get(animationId);
+    }
+
+    public boolean isTwoPhase() {
+        return arrivalAnimationId != -1 || arrivalGraphicId != -1;
     }
 
     public static TeleportAnimation randomReplacement(Random random, TeleportAnimation source) {

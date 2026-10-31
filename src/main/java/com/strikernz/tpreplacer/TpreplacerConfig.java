@@ -248,4 +248,26 @@ public interface TpreplacerConfig extends Config {
     default TeleportAnimation perOverrideGiantsoulAmulet() {
         return TeleportAnimation.NONE;
     }
+
+    @ConfigItem(
+            keyName = "per_overrideVolcanicMine",
+            name = "Volcanic Mine tab",
+            description = "Per-teleport animation (None uses global setting)",
+            position = 18,
+            section = perSection
+    )
+    default TeleportAnimation perOverrideVolcanicMine() {
+        return TeleportAnimation.NONE;
+    }
+
+    @ConfigItem(
+            keyName = "per_overrideGhommalsHilt",
+            name = "Ghommal's hilt",
+            description = "Per-teleport animation for every hilt tier (None uses global setting)",
+            position = 19,
+            section = perSection
+    )
+    default TeleportAnimation perOverrideGhommalsHilt() {
+        return TeleportAnimation.NONE;
+    }
 }
