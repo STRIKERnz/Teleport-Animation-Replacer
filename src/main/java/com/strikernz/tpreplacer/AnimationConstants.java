@@ -91,7 +91,7 @@ public final class AnimationConstants {
     public static final int VOLCANIC_MINE_TELEPORT = 7741;
     public static final int VOLCANIC_MINE_TELEPORT_ARRIVAL = 7747;
     public static final int VOLCANIC_MINE_TELEPORT_GRAPHIC = 1409;
-    public static final int VOLCANIC_MINE_TELEPORT_SOUND = -1;
+    public static final int VOLCANIC_MINE_TELEPORT_SOUND = 200; // Unconfirmed: standard teleport sound until logged in-game
 
     // Ghommal's hilt (Combat Achievements) teleports: the cast animation differs by body type; the red graphics
     // are an alternate colour of each tier
