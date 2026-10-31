@@ -39,6 +39,7 @@ Open the plugin settings in RuneLite and configure:
 
 ## Notes
 - This plugin is cosmetic only — it does not change teleport mechanics.
+- Ghommal's hilt teleports (the real ones and the presets) render incorrectly while RuneLite's **Animation Smoothing** plugin is on. Turn it off to see them properly.
 
 ## Version history
 
